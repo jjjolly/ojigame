@@ -18,8 +18,7 @@ import { particleSystem } from '../utils/particles';
 interface UncleBody extends Matter.Body {
   uncleId?: number;
   isUncle?: boolean;
-  lowestY?: number;
-  createdAt?: number; // Track when ball was created
+  createdAt?: number; // Track when ball was created (0 = merged ball, no grace period)
 }
 
 interface GameState {
@@ -34,8 +33,7 @@ interface GameState {
 }
 
 const HIGH_SCORE_KEY = 'ojigame_highscore';
-const MIN_DEPTH_FOR_GAME_OVER = GAME_OVER_LINE_Y + 50; // Ball must fall slightly below the line
-const BALL_GRACE_PERIOD = 1500; // 1.5 seconds before a ball can trigger game over
+const BALL_GRACE_PERIOD_MS = 1000; // 1 second grace period per ball
 
 export const useGame = () => {
   const engineRef = useRef<Matter.Engine | null>(null);
@@ -72,8 +70,7 @@ export const useGame = () => {
 
     body.uncleId = uncle.id;
     body.isUncle = true;
-    body.lowestY = alreadyInPlay ? y : DROP_AREA_HEIGHT / 2;
-    body.createdAt = alreadyInPlay ? 0 : Date.now(); // Merged balls have no grace period
+    body.createdAt = alreadyInPlay ? 0 : Date.now(); // 0 = merged ball (no grace period)
 
     return body;
   };
@@ -87,33 +84,26 @@ export const useGame = () => {
     for (const body of bodies) {
       const uncleBody = body as UncleBody;
       if (!uncleBody.isUncle || uncleBody.uncleId === undefined) continue;
+
       const uncle = UNCLES[uncleBody.uncleId];
       if (!uncle) continue;
 
-      // Update lowest Y (track how far the ball has fallen)
-      if (uncleBody.lowestY === undefined || uncleBody.position.y > uncleBody.lowestY) {
-        uncleBody.lowestY = uncleBody.position.y;
-      }
-
-      // Ball is "in play" if:
-      // 1. It has fallen below the threshold, OR
-      // 2. It has existed for longer than the grace period (for balls that land on top of others)
-      const hasReachedDepth = uncleBody.lowestY >= MIN_DEPTH_FOR_GAME_OVER;
-      const gracePeriodPassed = uncleBody.createdAt === 0 || (uncleBody.createdAt && (now - uncleBody.createdAt) > BALL_GRACE_PERIOD);
-
-      if (!hasReachedDepth && !gracePeriodPassed) {
+      // Skip balls still in grace period (just dropped)
+      const age = uncleBody.createdAt ? now - uncleBody.createdAt : Infinity;
+      if (age < BALL_GRACE_PERIOD_MS) {
         continue;
       }
 
       // Check if the TOP of the ball is above the game over line
       const uncleTop = uncleBody.position.y - uncle.radius;
       if (uncleTop < GAME_OVER_LINE_Y) {
-        // Check if the ball has settled (low velocity)
+        // Ball is above the line - check if it has settled
         const speed = Math.sqrt(
           uncleBody.velocity.x * uncleBody.velocity.x +
           uncleBody.velocity.y * uncleBody.velocity.y
         );
-        if (speed < 1.5) {
+        // Game over if ball is moving slowly (settled)
+        if (speed < 3.0) {
           return true;
         }
       }
