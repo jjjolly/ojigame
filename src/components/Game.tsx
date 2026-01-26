@@ -16,12 +16,14 @@ export const Game = () => {
     GAME_HEIGHT,
   } = useGame();
 
-  // Initialize game on mount
+  // Initialize game on mount (empty deps to run only once)
   useEffect(() => {
-    if (canvasRef.current) {
-      startGame(canvasRef.current);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      startGame(canvas);
     }
-  }, [startGame]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle touch/mouse events for positioning
   const getGameX = useCallback(

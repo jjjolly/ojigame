@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Matter from 'matter-js';
 import {
   UNCLES,
@@ -18,7 +18,7 @@ import { particleSystem } from '../utils/particles';
 interface UncleBody extends Matter.Body {
   uncleId?: number;
   isUncle?: boolean;
-  dropTime?: number;
+  lowestY?: number; // Track the lowest (highest number) Y position reached
 }
 
 interface GameState {
@@ -33,13 +33,12 @@ interface GameState {
 }
 
 const HIGH_SCORE_KEY = 'ojigame_highscore';
-const GAME_OVER_GRACE_PERIOD = 2000; // 2 seconds grace period
+const MIN_DEPTH_FOR_GAME_OVER = GAME_OVER_LINE_Y + 200; // Ball must have fallen at least this far
 
 export const useGame = () => {
   const engineRef = useRef<Matter.Engine | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const gameStartTimeRef = useRef<number>(0);
   const isInitializedRef = useRef(false);
 
   const stateRef = useRef<GameState>({
@@ -55,12 +54,12 @@ export const useGame = () => {
 
   const [displayState, setDisplayState] = useState<GameState>(stateRef.current);
 
-  const setState = useCallback((updates: Partial<GameState>) => {
+  const setState = (updates: Partial<GameState>) => {
     stateRef.current = { ...stateRef.current, ...updates };
     setDisplayState({ ...stateRef.current });
-  }, []);
+  };
 
-  const createUncleBody = (x: number, y: number, uncle: UncleType): UncleBody => {
+  const createUncleBody = (x: number, y: number, uncle: UncleType, alreadyInPlay: boolean = false): UncleBody => {
     const body = Matter.Bodies.circle(x, y, uncle.radius, {
       friction: PHYSICS_CONFIG.friction,
       frictionStatic: PHYSICS_CONFIG.frictionStatic,
@@ -71,7 +70,9 @@ export const useGame = () => {
 
     body.uncleId = uncle.id;
     body.isUncle = true;
-    body.dropTime = Date.now();
+    // For newly dropped balls, start with lowestY at spawn position
+    // For merged balls (alreadyInPlay), set lowestY to current position (they're already in play)
+    body.lowestY = alreadyInPlay ? y : DROP_AREA_HEIGHT / 2;
 
     return body;
   };
@@ -79,38 +80,40 @@ export const useGame = () => {
   const checkGameOver = (): boolean => {
     if (!engineRef.current) return false;
 
-    const now = Date.now();
-
-    // Don't check during initial grace period
-    if (now - gameStartTimeRef.current < GAME_OVER_GRACE_PERIOD) {
-      return false;
-    }
-
     const bodies = Matter.Composite.allBodies(engineRef.current.world);
 
     for (const body of bodies) {
       const uncleBody = body as UncleBody;
       if (!uncleBody.isUncle || uncleBody.uncleId === undefined) continue;
-
       const uncle = UNCLES[uncleBody.uncleId];
       if (!uncle) continue;
 
-      // Skip recently dropped balls (1.5 second grace per ball)
-      if (uncleBody.dropTime && now - uncleBody.dropTime < 1500) {
+      // Update lowest Y (track how far the ball has fallen)
+      if (uncleBody.lowestY === undefined || uncleBody.position.y > uncleBody.lowestY) {
+        uncleBody.lowestY = uncleBody.position.y;
+      }
+
+      // Ball must have fallen deep enough to be considered "in play"
+      // This prevents newly dropped balls from triggering game over
+      if (uncleBody.lowestY < MIN_DEPTH_FOR_GAME_OVER) {
         continue;
       }
 
+      // Check if the TOP of the ball is above the game over line
       const uncleTop = uncleBody.position.y - uncle.radius;
       if (uncleTop < GAME_OVER_LINE_Y) {
+        // Check if the ball has settled (low velocity)
         const speed = Math.sqrt(
           uncleBody.velocity.x * uncleBody.velocity.x +
           uncleBody.velocity.y * uncleBody.velocity.y
         );
-        if (speed < 1.0) {
+        // Use a slightly higher threshold for stability
+        if (speed < 2.0) {
           return true;
         }
       }
     }
+
     return false;
   };
 
@@ -123,15 +126,18 @@ export const useGame = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Clear and draw background
     ctx.fillStyle = '#E8E0D0';
     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
+    // Golden flash effect
     if (state.goldenFlash > 0) {
       ctx.fillStyle = `rgba(255, 215, 0, ${state.goldenFlash / 60 * 0.5})`;
       ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
       stateRef.current.goldenFlash = Math.max(0, state.goldenFlash - 1);
     }
 
+    // Background pattern
     ctx.strokeStyle = '#D0C8B8';
     ctx.lineWidth = 2;
     for (let y = 150; y < GAME_HEIGHT; y += 100) {
@@ -152,6 +158,7 @@ export const useGame = () => {
     ctx.lineTo(GAME_WIDTH - 20, GAME_HEIGHT);
     ctx.stroke();
 
+    // Game over line
     ctx.strokeStyle = '#FF0000';
     ctx.lineWidth = 2;
     ctx.setLineDash([10, 10]);
@@ -161,6 +168,7 @@ export const useGame = () => {
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // Preview uncle
     if (!state.isGameOver && state.canDrop) {
       const uncle = state.currentUncle;
       ctx.globalAlpha = 0.5;
@@ -191,8 +199,8 @@ export const useGame = () => {
       ctx.globalAlpha = 1;
     }
 
+    // Draw all uncles
     const bodies = Matter.Composite.allBodies(engine.world);
-
     for (const body of bodies) {
       const uncleBody = body as UncleBody;
       if (!uncleBody.isUncle || uncleBody.uncleId === undefined) continue;
@@ -231,9 +239,11 @@ export const useGame = () => {
       ctx.restore();
     }
 
+    // Particles
     particleSystem.update();
     particleSystem.draw(ctx);
 
+    // Next uncle preview
     const nextUncle = state.nextUncle;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(GAME_WIDTH - 70, 10, 60, 60);
@@ -254,20 +264,21 @@ export const useGame = () => {
     ctx.fillText(nextUncle.emoji, GAME_WIDTH - 40, 52);
   };
 
-  const gameLoopRef = useRef<() => void>(() => {});
-
-  gameLoopRef.current = () => {
-    if (!engineRef.current) return;
+  const gameLoop = () => {
+    if (!engineRef.current || stateRef.current.isGameOver) {
+      return;
+    }
 
     Matter.Engine.update(engineRef.current, 1000 / 60);
     draw();
 
-    if (!stateRef.current.isGameOver && checkGameOver()) {
+    if (checkGameOver()) {
       setState({ isGameOver: true });
       soundManager.playGameOverSound();
+      return;
     }
 
-    animationFrameRef.current = requestAnimationFrame(() => gameLoopRef.current?.());
+    animationFrameRef.current = requestAnimationFrame(gameLoop);
   };
 
   const initEngine = () => {
@@ -282,6 +293,7 @@ export const useGame = () => {
 
     engineRef.current = engine;
 
+    // Walls
     const walls = [
       Matter.Bodies.rectangle(
         GAME_WIDTH / 2,
@@ -308,6 +320,7 @@ export const useGame = () => {
 
     Matter.Composite.add(engine.world, walls);
 
+    // Collision handler for merging
     Matter.Events.on(engine, 'collisionStart', (event) => {
       for (const pair of event.pairs) {
         const bodyA = pair.bodyA as UncleBody;
@@ -329,12 +342,11 @@ export const useGame = () => {
           Matter.Composite.remove(engineRef.current.world, bodyA);
           Matter.Composite.remove(engineRef.current.world, bodyB);
 
-          const newBody = createUncleBody(midX, midY, nextUncle);
-          newBody.dropTime = 0;
+          // Merged ball is already in play
+          const newBody = createUncleBody(midX, midY, nextUncle, true);
           Matter.Composite.add(engineRef.current.world, newBody);
 
-          const currentUncle = UNCLES[uncleId];
-          soundManager.playMergeSound(currentUncle.soundType);
+          soundManager.playMergeSound(UNCLES[uncleId].soundType);
 
           const isEnlightenment = nextUncle.id === 10;
           particleSystem.createMergeParticles(midX, midY, nextUncle.color, isEnlightenment);
@@ -356,21 +368,20 @@ export const useGame = () => {
     });
   };
 
-  const startGame = useCallback((canvas: HTMLCanvasElement) => {
+  const startGame = (canvas: HTMLCanvasElement) => {
     if (isInitializedRef.current) return;
     isInitializedRef.current = true;
 
     canvasRef.current = canvas;
-    gameStartTimeRef.current = Date.now();
     initEngine();
-    gameLoopRef.current?.();
-  }, []);
+    requestAnimationFrame(gameLoop);
+  };
 
-  const dropUncle = useCallback(() => {
+  const dropUncle = () => {
     const state = stateRef.current;
     if (!engineRef.current || !state.canDrop || state.isGameOver) return;
 
-    const body = createUncleBody(state.dropX, DROP_AREA_HEIGHT / 2, state.currentUncle);
+    const body = createUncleBody(state.dropX, DROP_AREA_HEIGHT / 2, state.currentUncle, false);
     Matter.Composite.add(engineRef.current.world, body);
 
     soundManager.playDropSound();
@@ -384,22 +395,21 @@ export const useGame = () => {
     setTimeout(() => {
       setState({ canDrop: true });
     }, 500);
-  }, [setState]);
+  };
 
-  const updateDropX = useCallback((x: number) => {
+  const updateDropX = (x: number) => {
     const uncle = stateRef.current.currentUncle;
     const minX = uncle.radius;
     const maxX = GAME_WIDTH - uncle.radius;
     stateRef.current.dropX = Math.max(minX, Math.min(maxX, x));
-  }, []);
+  };
 
-  const restartGame = useCallback(() => {
+  const restartGame = () => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
 
     particleSystem.clear();
-    isInitializedRef.current = false;
 
     const newState: GameState = {
       score: 0,
@@ -414,11 +424,9 @@ export const useGame = () => {
     stateRef.current = newState;
     setDisplayState({ ...newState });
 
-    gameStartTimeRef.current = Date.now();
-    isInitializedRef.current = true;
     initEngine();
-    gameLoopRef.current?.();
-  }, []);
+    requestAnimationFrame(gameLoop);
+  };
 
   useEffect(() => {
     return () => {
