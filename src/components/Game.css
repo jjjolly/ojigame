@@ -1,0 +1,257 @@
+.game-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.game-container {
+  position: relative;
+  max-width: 100%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.game-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Score display */
+.score-display {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px 8px 0 0;
+  margin-bottom: -4px;
+  position: relative;
+  z-index: 1;
+}
+
+.score,
+.high-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.score-label {
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.score-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+}
+
+.high-score .score-value {
+  color: #ffd700;
+}
+
+/* Game over overlay */
+.game-over-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.game-over-content {
+  text-align: center;
+  color: white;
+  padding: 30px;
+}
+
+.game-over-content h2 {
+  font-size: 36px;
+  margin: 0 0 20px 0;
+  color: #ff6b6b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.final-scores {
+  margin-bottom: 30px;
+}
+
+.final-scores p {
+  font-size: 18px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.final-scores span:first-child {
+  color: #888;
+}
+
+.final-score-value {
+  font-weight: bold;
+  color: #ffd700;
+  font-size: 24px;
+  font-family: 'Courier New', monospace;
+}
+
+.restart-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.restart-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.restart-button:active {
+  transform: translateY(0);
+}
+
+/* Evolution guide */
+.evolution-guide {
+  margin-top: 15px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.guide-title {
+  color: #888;
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.guide-list {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.guide-item {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.guide-item::after {
+  content: '→';
+  position: absolute;
+  right: -8px;
+  font-size: 8px;
+  color: #666;
+}
+
+.guide-item:last-child::after {
+  content: '';
+}
+
+.guide-emoji {
+  font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 420px) {
+  .game-wrapper {
+    padding: 5px;
+  }
+
+  .score-display {
+    padding: 8px 10px;
+  }
+
+  .score-label {
+    font-size: 8px;
+  }
+
+  .score-value {
+    font-size: 20px;
+  }
+
+  .guide-item {
+    width: 24px;
+    height: 24px;
+  }
+
+  .guide-emoji {
+    font-size: 14px;
+  }
+}
+
+@media (max-height: 700px) {
+  .game-wrapper {
+    padding: 5px;
+  }
+
+  .evolution-guide {
+    margin-top: 10px;
+    padding: 8px;
+  }
+
+  .guide-item {
+    width: 24px;
+    height: 24px;
+  }
+}
