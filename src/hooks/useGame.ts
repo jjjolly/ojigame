@@ -18,7 +18,8 @@ import { particleSystem } from '../utils/particles';
 interface UncleBody extends Matter.Body {
   uncleId?: number;
   isUncle?: boolean;
-  lowestY?: number; // Track the lowest (highest number) Y position reached
+  lowestY?: number;
+  createdAt?: number; // Track when ball was created
 }
 
 interface GameState {
@@ -33,7 +34,8 @@ interface GameState {
 }
 
 const HIGH_SCORE_KEY = 'ojigame_highscore';
-const MIN_DEPTH_FOR_GAME_OVER = GAME_OVER_LINE_Y + 200; // Ball must have fallen at least this far
+const MIN_DEPTH_FOR_GAME_OVER = GAME_OVER_LINE_Y + 50; // Ball must fall slightly below the line
+const BALL_GRACE_PERIOD = 1500; // 1.5 seconds before a ball can trigger game over
 
 export const useGame = () => {
   const engineRef = useRef<Matter.Engine | null>(null);
@@ -70,9 +72,8 @@ export const useGame = () => {
 
     body.uncleId = uncle.id;
     body.isUncle = true;
-    // For newly dropped balls, start with lowestY at spawn position
-    // For merged balls (alreadyInPlay), set lowestY to current position (they're already in play)
     body.lowestY = alreadyInPlay ? y : DROP_AREA_HEIGHT / 2;
+    body.createdAt = alreadyInPlay ? 0 : Date.now(); // Merged balls have no grace period
 
     return body;
   };
@@ -80,6 +81,7 @@ export const useGame = () => {
   const checkGameOver = (): boolean => {
     if (!engineRef.current) return false;
 
+    const now = Date.now();
     const bodies = Matter.Composite.allBodies(engineRef.current.world);
 
     for (const body of bodies) {
@@ -93,9 +95,13 @@ export const useGame = () => {
         uncleBody.lowestY = uncleBody.position.y;
       }
 
-      // Ball must have fallen deep enough to be considered "in play"
-      // This prevents newly dropped balls from triggering game over
-      if (uncleBody.lowestY < MIN_DEPTH_FOR_GAME_OVER) {
+      // Ball is "in play" if:
+      // 1. It has fallen below the threshold, OR
+      // 2. It has existed for longer than the grace period (for balls that land on top of others)
+      const hasReachedDepth = uncleBody.lowestY >= MIN_DEPTH_FOR_GAME_OVER;
+      const gracePeriodPassed = uncleBody.createdAt === 0 || (uncleBody.createdAt && (now - uncleBody.createdAt) > BALL_GRACE_PERIOD);
+
+      if (!hasReachedDepth && !gracePeriodPassed) {
         continue;
       }
 
@@ -107,8 +113,7 @@ export const useGame = () => {
           uncleBody.velocity.x * uncleBody.velocity.x +
           uncleBody.velocity.y * uncleBody.velocity.y
         );
-        // Use a slightly higher threshold for stability
-        if (speed < 2.0) {
+        if (speed < 1.5) {
           return true;
         }
       }
