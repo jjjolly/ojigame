@@ -18,6 +18,7 @@ import { particleSystem } from '../utils/particles';
 interface UncleBody extends Matter.Body {
   uncleId?: number;
   isUncle?: boolean;
+  hasEnteredPlayArea?: boolean; // Track if ball has fallen into play area
 }
 
 interface GameState {
@@ -61,7 +62,7 @@ export const useGame = () => {
   }, []);
 
   // Create uncle body
-  const createUncleBody = useCallback((x: number, y: number, uncle: UncleType): UncleBody => {
+  const createUncleBody = useCallback((x: number, y: number, uncle: UncleType, hasEntered: boolean = false): UncleBody => {
     const body = Matter.Bodies.circle(x, y, uncle.radius, {
       friction: PHYSICS_CONFIG.friction,
       frictionStatic: PHYSICS_CONFIG.frictionStatic,
@@ -72,6 +73,7 @@ export const useGame = () => {
 
     body.uncleId = uncle.id;
     body.isUncle = true;
+    body.hasEnteredPlayArea = hasEntered; // New balls start as not entered
 
     return body;
   }, []);
@@ -81,6 +83,7 @@ export const useGame = () => {
     if (!engineRef.current) return false;
 
     const bodies = Matter.Composite.allBodies(engineRef.current.world);
+    const playAreaTop = GAME_OVER_LINE_Y + 50; // Buffer zone below game over line
 
     for (const body of bodies) {
       const uncleBody = body as UncleBody;
@@ -88,15 +91,24 @@ export const useGame = () => {
         const uncle = UNCLES[uncleBody.uncleId];
         if (!uncle) continue;
 
-        // Check if uncle is above the game over line and has settled
-        if (uncleBody.position.y - uncle.radius < GAME_OVER_LINE_Y) {
-          // Check if the body has low velocity (settled)
-          const speed = Math.sqrt(
-            uncleBody.velocity.x * uncleBody.velocity.x +
-            uncleBody.velocity.y * uncleBody.velocity.y
-          );
-          if (speed < 0.5) {
-            return true;
+        // Mark ball as entered play area once it falls below the buffer zone
+        if (!uncleBody.hasEnteredPlayArea && uncleBody.position.y > playAreaTop) {
+          uncleBody.hasEnteredPlayArea = true;
+        }
+
+        // Only check game over for balls that have entered the play area
+        // This prevents newly dropped balls from triggering game over
+        if (uncleBody.hasEnteredPlayArea) {
+          // Check if uncle is above the game over line and has settled
+          if (uncleBody.position.y - uncle.radius < GAME_OVER_LINE_Y) {
+            // Check if the body has low velocity (settled)
+            const speed = Math.sqrt(
+              uncleBody.velocity.x * uncleBody.velocity.x +
+              uncleBody.velocity.y * uncleBody.velocity.y
+            );
+            if (speed < 0.5) {
+              return true;
+            }
           }
         }
       }
@@ -349,8 +361,8 @@ export const useGame = () => {
           Matter.Composite.remove(engineRef.current.world, bodyA);
           Matter.Composite.remove(engineRef.current.world, bodyB);
 
-          // Create new evolved uncle
-          const newBody = createUncleBody(midX, midY, nextUncle);
+          // Create new evolved uncle (mark as entered since it's from merged balls)
+          const newBody = createUncleBody(midX, midY, nextUncle, true);
           Matter.Composite.add(engineRef.current.world, newBody);
 
           // Play sound and create particles
