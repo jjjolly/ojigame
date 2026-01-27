@@ -1,151 +1,158 @@
-// Uncle definitions - 11 evolution stages
-// Each uncle has a specific size, color, emoji representation, and score value
+// Soul Orb definitions - 11 evolution stages
+// Deep Sea Spiritual theme - each orb represents a stage of spiritual awakening
 
-export interface UncleType {
+export interface OrbType {
   id: number;
   name: string;
   nameJa: string;
   emoji: string;
   radius: number;
   color: string;
-  borderColor: string;
+  glowColor: string;
   score: number;
-  soundType: 'light' | 'heavy' | 'enlightenment';
+  soundType: 'light' | 'medium' | 'deep' | 'enlightenment';
 }
 
-export const UNCLES: UncleType[] = [
+// Backward compatibility alias
+export type UncleType = OrbType;
+
+export const ORBS: OrbType[] = [
   {
     id: 0,
-    name: 'bean-uncle',
-    nameJa: '豆粒おじさん',
-    emoji: '👴',
+    name: 'bubble',
+    nameJa: '泡',
+    emoji: '🫧',
     radius: 20,
-    color: '#F5DEB3',
-    borderColor: '#DEB887',
+    color: '#E0F2FE',
+    glowColor: '#BAE6FD',
     score: 1,
     soundType: 'light',
   },
   {
     id: 1,
-    name: 'sitting-uncle',
-    nameJa: '体育座りおじさん',
-    emoji: '🧘',
+    name: 'droplet',
+    nameJa: '雫',
+    emoji: '💧',
     radius: 28,
-    color: '#FFE4B5',
-    borderColor: '#DEB887',
+    color: '#BAE6FD',
+    glowColor: '#7DD3FC',
     score: 3,
     soundType: 'light',
   },
   {
     id: 2,
-    name: 'handstand-uncle',
-    nameJa: '逆立ちおじさん',
-    emoji: '🤸',
+    name: 'lotus-sprout',
+    nameJa: '蓮の芽',
+    emoji: '🌱',
     radius: 36,
-    color: '#FFDAB9',
-    borderColor: '#CD853F',
+    color: '#5EEAD4',
+    glowColor: '#2DD4BF',
     score: 6,
     soundType: 'light',
   },
   {
     id: 3,
-    name: 'arms-crossed-uncle',
-    nameJa: '腕組みおじさん',
-    emoji: '🤔',
+    name: 'lotus',
+    nameJa: '蓮華',
+    emoji: '🪷',
     radius: 44,
-    color: '#FFD700',
-    borderColor: '#DAA520',
+    color: '#F9A8D4',
+    glowColor: '#F472B6',
     score: 10,
     soundType: 'light',
   },
   {
     id: 4,
-    name: 'beer-belly-uncle',
-    nameJa: 'ビール腹おじさん',
-    emoji: '🍺',
+    name: 'om',
+    nameJa: '梵字',
+    emoji: 'ॐ',
     radius: 52,
-    color: '#FFA500',
-    borderColor: '#FF8C00',
+    color: '#FDE047',
+    glowColor: '#FACC15',
     score: 15,
-    soundType: 'light',
+    soundType: 'medium',
   },
   {
     id: 5,
-    name: 'golf-uncle',
-    nameJa: 'ゴルフスイングおじさん',
-    emoji: '🏌️',
+    name: 'mudra',
+    nameJa: '慈悲の印',
+    emoji: '🫱',
     radius: 62,
-    color: '#98FB98',
-    borderColor: '#32CD32',
+    color: '#818CF8',
+    glowColor: '#6366F1',
     score: 21,
-    soundType: 'heavy',
+    soundType: 'medium',
   },
   {
     id: 6,
-    name: 'newspaper-uncle',
-    nameJa: '新聞を読むおじさん',
-    emoji: '📰',
+    name: 'third-eye',
+    nameJa: '第三の眼',
+    emoji: '👁️',
     radius: 72,
-    color: '#87CEEB',
-    borderColor: '#4682B4',
+    color: '#A855F7',
+    glowColor: '#9333EA',
     score: 28,
-    soundType: 'heavy',
+    soundType: 'medium',
   },
   {
     id: 7,
-    name: 'bonsai-uncle',
-    nameJa: '盆栽を愛でるおじさん',
-    emoji: '🌳',
+    name: 'mandala',
+    nameJa: '曼荼羅',
+    emoji: '🔆',
     radius: 84,
-    color: '#90EE90',
-    borderColor: '#228B22',
+    color: '#FB923C',
+    glowColor: '#F97316',
     score: 36,
-    soundType: 'heavy',
+    soundType: 'deep',
   },
   {
     id: 8,
-    name: 'karaoke-uncle',
-    nameJa: 'カラオケ熱唱おじさん',
-    emoji: '🎤',
+    name: 'light-particle',
+    nameJa: '光の粒子',
+    emoji: '✨',
     radius: 96,
-    color: '#FF69B4',
-    borderColor: '#C71585',
+    color: '#FFFFFF',
+    glowColor: '#E0E7FF',
     score: 45,
-    soundType: 'heavy',
+    soundType: 'deep',
   },
   {
     id: 9,
-    name: 'table-flip-uncle',
-    nameJa: 'ちゃぶ台返しおじさん',
-    emoji: '😡',
+    name: 'infinity',
+    nameJa: '全一',
+    emoji: '♾️',
     radius: 110,
-    color: '#FF6347',
-    borderColor: '#DC143C',
+    color: '#FDE68A',
+    glowColor: '#FCD34D',
     score: 55,
-    soundType: 'heavy',
+    soundType: 'deep',
   },
   {
     id: 10,
-    name: 'buddha-uncle',
-    nameJa: '大仏おじさん',
-    emoji: '🙏',
+    name: 'enlightenment',
+    nameJa: '悟り',
+    emoji: '👁‍🗨',
     radius: 130,
-    color: '#FFD700',
-    borderColor: '#B8860B',
+    color: '#FEF3C7',
+    glowColor: '#FDE68A',
     score: 100,
     soundType: 'enlightenment',
   },
 ];
 
+// Backward compatibility alias
+export const UNCLES = ORBS;
+
 // Game constants
 export const GAME_WIDTH = 400;
-export const GAME_HEIGHT = 700;
+export const GAME_HEIGHT = 600; // Reduced to make room for ad
 export const WALL_THICKNESS = 20;
-export const GAME_OVER_LINE_Y = 100; // Y position of the game over line
-export const DROP_AREA_HEIGHT = 80; // Height of the drop area at top
+export const GAME_OVER_LINE_Y = 100;
+export const DROP_AREA_HEIGHT = 80;
 
-// The maximum uncle type that can spawn (excluding the largest ones)
-export const MAX_SPAWN_UNCLE_ID = 4; // Up to beer belly uncle can spawn
+// The maximum orb type that can spawn (excluding the largest ones)
+export const MAX_SPAWN_ORB_ID = 4;
+export const MAX_SPAWN_UNCLE_ID = MAX_SPAWN_ORB_ID; // Backward compatibility
 
 // Physics constants
 export const PHYSICS_CONFIG = {
@@ -155,19 +162,31 @@ export const PHYSICS_CONFIG = {
   density: 0.001,
 };
 
-// Get uncle by ID
-export const getUncleById = (id: number): UncleType | undefined => {
-  return UNCLES.find((uncle) => uncle.id === id);
+// Deep sea theme colors
+export const THEME = {
+  background: '#050b1a',
+  backgroundGradientStart: '#050b1a',
+  backgroundGradientEnd: '#0c1929',
+  gameOverLine: 'rgba(255, 100, 100, 0.6)',
+  guideLine: 'rgba(255, 255, 255, 0.15)',
+  glowIntensity: 20,
 };
 
-// Get next evolution uncle
-export const getNextEvolution = (id: number): UncleType | undefined => {
-  if (id >= UNCLES.length - 1) return undefined;
-  return UNCLES[id + 1];
+// Get orb by ID
+export const getOrbById = (id: number): OrbType | undefined => {
+  return ORBS.find((orb) => orb.id === id);
+};
+export const getUncleById = getOrbById; // Backward compatibility
+
+// Get next evolution orb
+export const getNextEvolution = (id: number): OrbType | undefined => {
+  if (id >= ORBS.length - 1) return undefined;
+  return ORBS[id + 1];
 };
 
-// Get random spawnable uncle
-export const getRandomSpawnableUncle = (): UncleType => {
-  const randomId = Math.floor(Math.random() * (MAX_SPAWN_UNCLE_ID + 1));
-  return UNCLES[randomId];
+// Get random spawnable orb
+export const getRandomSpawnableOrb = (): OrbType => {
+  const randomId = Math.floor(Math.random() * (MAX_SPAWN_ORB_ID + 1));
+  return ORBS[randomId];
 };
+export const getRandomSpawnableUncle = getRandomSpawnableOrb; // Backward compatibility

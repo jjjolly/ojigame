@@ -1,5 +1,5 @@
 // Sound utilities using Web Audio API
-// Creates synthesized sounds for the game
+// Creates synthesized singing bowl sounds for the spiritual theme
 
 class SoundManager {
   private audioContext: AudioContext | null = null;
@@ -28,204 +28,212 @@ class SoundManager {
     }
   }
 
-  // Drop sound - soft "koton" sound
+  // Create a singing bowl tone with harmonics
+  private playSingingBowl(
+    baseFreq: number,
+    duration: number,
+    volume: number = 0.3,
+    harmonicRichness: number = 1
+  ): void {
+    const ctx = this.getAudioContext();
+    const now = ctx.currentTime;
+
+    // Main fundamental frequency
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.frequency.setValueAtTime(baseFreq, now);
+    osc1.type = 'sine';
+    gain1.gain.setValueAtTime(volume, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+    // Second harmonic (octave)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.frequency.setValueAtTime(baseFreq * 2, now);
+    osc2.type = 'sine';
+    gain2.gain.setValueAtTime(volume * 0.5 * harmonicRichness, now);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.8);
+
+    // Third harmonic (perfect fifth above octave)
+    const osc3 = ctx.createOscillator();
+    const gain3 = ctx.createGain();
+    osc3.connect(gain3);
+    gain3.connect(ctx.destination);
+    osc3.frequency.setValueAtTime(baseFreq * 3, now);
+    osc3.type = 'sine';
+    gain3.gain.setValueAtTime(volume * 0.25 * harmonicRichness, now);
+    gain3.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.6);
+
+    // Subtle beating effect with slightly detuned oscillator
+    const osc4 = ctx.createOscillator();
+    const gain4 = ctx.createGain();
+    osc4.connect(gain4);
+    gain4.connect(ctx.destination);
+    osc4.frequency.setValueAtTime(baseFreq * 1.003, now); // Slight detune for beating
+    osc4.type = 'sine';
+    gain4.gain.setValueAtTime(volume * 0.3, now);
+    gain4.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+    osc1.start(now);
+    osc1.stop(now + duration);
+    osc2.start(now);
+    osc2.stop(now + duration * 0.8);
+    osc3.start(now);
+    osc3.stop(now + duration * 0.6);
+    osc4.start(now);
+    osc4.stop(now + duration);
+  }
+
+  // Drop sound - gentle water drop
   public playDropSound(): void {
     if (!this.isEnabled) return;
 
     const ctx = this.getAudioContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+    const now = ctx.currentTime;
 
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
-    oscillator.frequency.setValueAtTime(200, ctx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1);
-    oscillator.type = 'sine';
+    osc.connect(gain);
+    gain.connect(ctx.destination);
 
-    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+    // Water drop: high to low frequency sweep
+    osc.frequency.setValueAtTime(600, now);
+    osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+    osc.type = 'sine';
 
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+    osc.start(now);
+    osc.stop(now + 0.15);
   }
 
-  // Light merge sound - "hoh" / "hah"
+  // Light merge sound - high, clear singing bowl
   public playLightMergeSound(): void {
     if (!this.isEnabled) return;
-
-    const ctx = this.getAudioContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
-
-    oscillator.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(ctx.destination);
-
-    // Low-pitched voice-like sound
-    oscillator.frequency.setValueAtTime(150, ctx.currentTime);
-    oscillator.frequency.setValueAtTime(180, ctx.currentTime + 0.05);
-    oscillator.frequency.setValueAtTime(120, ctx.currentTime + 0.15);
-    oscillator.type = 'sawtooth';
-
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(800, ctx.currentTime);
-
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-    gainNode.gain.setValueAtTime(0.4, ctx.currentTime + 0.05);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.2);
+    // High frequency, short duration - like a small crystal bowl
+    this.playSingingBowl(880, 1.5, 0.25, 0.8);
   }
 
-  // Heavy merge sound - "goooon" / "deeeen"
-  public playHeavyMergeSound(): void {
+  // Medium merge sound - mid-range singing bowl
+  public playMediumMergeSound(): void {
     if (!this.isEnabled) return;
-
-    const ctx = this.getAudioContext();
-
-    // Main low frequency oscillator
-    const oscillator1 = ctx.createOscillator();
-    const gainNode1 = ctx.createGain();
-    const filter1 = ctx.createBiquadFilter();
-
-    oscillator1.connect(filter1);
-    filter1.connect(gainNode1);
-    gainNode1.connect(ctx.destination);
-
-    oscillator1.frequency.setValueAtTime(80, ctx.currentTime);
-    oscillator1.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.5);
-    oscillator1.type = 'sawtooth';
-
-    filter1.type = 'lowpass';
-    filter1.frequency.setValueAtTime(400, ctx.currentTime);
-    filter1.Q.setValueAtTime(5, ctx.currentTime);
-
-    gainNode1.gain.setValueAtTime(0.4, ctx.currentTime);
-    gainNode1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-
-    // Sub bass
-    const oscillator2 = ctx.createOscillator();
-    const gainNode2 = ctx.createGain();
-
-    oscillator2.connect(gainNode2);
-    gainNode2.connect(ctx.destination);
-
-    oscillator2.frequency.setValueAtTime(50, ctx.currentTime);
-    oscillator2.type = 'sine';
-
-    gainNode2.gain.setValueAtTime(0.3, ctx.currentTime);
-    gainNode2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-
-    oscillator1.start(ctx.currentTime);
-    oscillator1.stop(ctx.currentTime + 0.5);
-    oscillator2.start(ctx.currentTime);
-    oscillator2.stop(ctx.currentTime + 0.4);
+    // Medium frequency, moderate duration
+    this.playSingingBowl(528, 2.0, 0.3, 1.0);
   }
 
-  // Enlightenment sound - bell + "SATORI!" voice
+  // Deep merge sound - low, resonant singing bowl
+  public playDeepMergeSound(): void {
+    if (!this.isEnabled) return;
+    // Low frequency, long duration - like a large Tibetan bowl
+    this.playSingingBowl(256, 2.5, 0.35, 1.2);
+  }
+
+  // Enlightenment sound - multiple bowls in harmony + ethereal tones
   public playEnlightenmentSound(): void {
     if (!this.isEnabled) return;
 
     const ctx = this.getAudioContext();
+    const now = ctx.currentTime;
 
-    // Bell sound
-    const bellOsc = ctx.createOscillator();
-    const bellGain = ctx.createGain();
+    // Multiple singing bowls in harmony (Om chord)
+    this.playSingingBowl(256, 4.0, 0.25, 1.0); // Root
+    setTimeout(() => {
+      this.playSingingBowl(384, 3.5, 0.2, 0.8); // Fifth
+    }, 100);
+    setTimeout(() => {
+      this.playSingingBowl(512, 3.0, 0.15, 0.6); // Octave
+    }, 200);
 
-    bellOsc.connect(bellGain);
-    bellGain.connect(ctx.destination);
+    // Ethereal shimmer effect
+    const shimmerOsc = ctx.createOscillator();
+    const shimmerGain = ctx.createGain();
+    const shimmerFilter = ctx.createBiquadFilter();
 
-    bellOsc.frequency.setValueAtTime(800, ctx.currentTime);
-    bellOsc.type = 'sine';
+    shimmerOsc.connect(shimmerFilter);
+    shimmerFilter.connect(shimmerGain);
+    shimmerGain.connect(ctx.destination);
 
-    bellGain.gain.setValueAtTime(0.5, ctx.currentTime);
-    bellGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 2);
+    shimmerOsc.type = 'sawtooth';
+    shimmerOsc.frequency.setValueAtTime(1024, now + 0.3);
+    shimmerOsc.frequency.linearRampToValueAtTime(2048, now + 2);
 
-    // Bell harmonics
-    const bellOsc2 = ctx.createOscillator();
-    const bellGain2 = ctx.createGain();
+    shimmerFilter.type = 'bandpass';
+    shimmerFilter.frequency.setValueAtTime(2000, now + 0.3);
+    shimmerFilter.Q.setValueAtTime(10, now + 0.3);
 
-    bellOsc2.connect(bellGain2);
-    bellGain2.connect(ctx.destination);
+    shimmerGain.gain.setValueAtTime(0, now);
+    shimmerGain.gain.linearRampToValueAtTime(0.08, now + 0.5);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 3);
 
-    bellOsc2.frequency.setValueAtTime(1200, ctx.currentTime);
-    bellOsc2.type = 'sine';
+    shimmerOsc.start(now + 0.3);
+    shimmerOsc.stop(now + 3);
 
-    bellGain2.gain.setValueAtTime(0.3, ctx.currentTime);
-    bellGain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
+    // Deep om drone
+    const droneOsc = ctx.createOscillator();
+    const droneGain = ctx.createGain();
 
-    // Voice-like "SATORI" sound
-    const voiceOsc = ctx.createOscillator();
-    const voiceGain = ctx.createGain();
-    const voiceFilter = ctx.createBiquadFilter();
+    droneOsc.connect(droneGain);
+    droneGain.connect(ctx.destination);
 
-    voiceOsc.connect(voiceFilter);
-    voiceFilter.connect(voiceGain);
-    voiceGain.connect(ctx.destination);
+    droneOsc.type = 'sine';
+    droneOsc.frequency.setValueAtTime(64, now);
 
-    voiceOsc.type = 'sawtooth';
-    voiceOsc.frequency.setValueAtTime(120, ctx.currentTime + 0.3);
-    voiceOsc.frequency.setValueAtTime(150, ctx.currentTime + 0.5);
-    voiceOsc.frequency.setValueAtTime(100, ctx.currentTime + 0.8);
+    droneGain.gain.setValueAtTime(0, now);
+    droneGain.gain.linearRampToValueAtTime(0.2, now + 0.5);
+    droneGain.gain.exponentialRampToValueAtTime(0.001, now + 4);
 
-    voiceFilter.type = 'bandpass';
-    voiceFilter.frequency.setValueAtTime(500, ctx.currentTime + 0.3);
-    voiceFilter.frequency.setValueAtTime(800, ctx.currentTime + 0.5);
-    voiceFilter.frequency.setValueAtTime(400, ctx.currentTime + 0.8);
-    voiceFilter.Q.setValueAtTime(3, ctx.currentTime);
-
-    voiceGain.gain.setValueAtTime(0, ctx.currentTime);
-    voiceGain.gain.setValueAtTime(0.5, ctx.currentTime + 0.3);
-    voiceGain.gain.setValueAtTime(0.6, ctx.currentTime + 0.5);
-    voiceGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
-
-    bellOsc.start(ctx.currentTime);
-    bellOsc.stop(ctx.currentTime + 2);
-    bellOsc2.start(ctx.currentTime);
-    bellOsc2.stop(ctx.currentTime + 1.5);
-    voiceOsc.start(ctx.currentTime + 0.3);
-    voiceOsc.stop(ctx.currentTime + 1.2);
+    droneOsc.start(now);
+    droneOsc.stop(now + 4);
   }
 
-  // Game over sound - sad, short melody
+  // Game over sound - melancholic descending tones
   public playGameOverSound(): void {
     if (!this.isEnabled) return;
 
     const ctx = this.getAudioContext();
+    const now = ctx.currentTime;
 
-    // Descending notes
-    const notes = [400, 350, 300, 250];
+    // Descending singing bowl tones
+    const frequencies = [528, 440, 352, 264];
 
-    notes.forEach((freq, index) => {
+    frequencies.forEach((freq, index) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.15);
+      const startTime = now + index * 0.3;
+
+      osc.frequency.setValueAtTime(freq, startTime);
       osc.type = 'sine';
 
-      gain.gain.setValueAtTime(0, ctx.currentTime + index * 0.15);
-      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + index * 0.15 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + index * 0.15 + 0.15);
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.8);
 
-      osc.start(ctx.currentTime + index * 0.15);
-      osc.stop(ctx.currentTime + index * 0.15 + 0.15);
+      osc.start(startTime);
+      osc.stop(startTime + 0.8);
     });
   }
 
-  // Play merge sound based on uncle type
-  public playMergeSound(soundType: 'light' | 'heavy' | 'enlightenment'): void {
+  // Play merge sound based on orb type
+  public playMergeSound(soundType: 'light' | 'medium' | 'deep' | 'enlightenment'): void {
     switch (soundType) {
       case 'light':
         this.playLightMergeSound();
         break;
-      case 'heavy':
-        this.playHeavyMergeSound();
+      case 'medium':
+        this.playMediumMergeSound();
+        break;
+      case 'deep':
+        this.playDeepMergeSound();
         break;
       case 'enlightenment':
         this.playEnlightenmentSound();

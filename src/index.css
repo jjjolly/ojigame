@@ -10,8 +10,8 @@
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #1a252f;
+  color: rgba(224, 242, 254, 0.87);
+  background-color: #050b1a;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -27,6 +27,7 @@ body {
   height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
+  background: linear-gradient(180deg, #050b1a 0%, #0c1929 100%);
 }
 
 #root {
@@ -47,16 +48,24 @@ body {
 /* Button reset */
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid rgba(125, 211, 252, 0.3);
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   transition: all 0.25s;
+  background: rgba(125, 211, 252, 0.1);
+  color: #E0F2FE;
+}
+
+button:hover {
+  background: rgba(125, 211, 252, 0.2);
+  border-color: rgba(125, 211, 252, 0.5);
 }
 
 button:focus,
 button:focus-visible {
   outline: none;
+  box-shadow: 0 0 10px rgba(125, 211, 252, 0.3);
 }

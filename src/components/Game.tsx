@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useGame } from '../hooks/useGame';
 import { soundManager } from '../utils/sounds';
+import { ORBS } from '../constants/uncles';
 import './Game.css';
 
 export const Game = () => {
@@ -10,7 +11,7 @@ export const Game = () => {
     gameState,
     startGame,
     restartGame,
-    dropUncle,
+    dropOrb,
     updateDropX,
     GAME_WIDTH,
     GAME_HEIGHT,
@@ -59,8 +60,8 @@ export const Game = () => {
 
   const handlePointerUp = useCallback(() => {
     if (gameState.isGameOver) return;
-    dropUncle();
-  }, [dropUncle, gameState.isGameOver]);
+    dropOrb();
+  }, [dropOrb, gameState.isGameOver]);
 
   const handleRestart = useCallback(async () => {
     await soundManager.resume();
@@ -73,11 +74,11 @@ export const Game = () => {
         {/* Score display */}
         <div className="score-display">
           <div className="score">
-            <span className="score-label">SCORE:</span>
+            <span className="score-label">SCORE</span>
             <span className="score-value">{gameState.score}</span>
           </div>
           <div className="high-score">
-            <span className="score-label">HIGH SCORE:</span>
+            <span className="score-label">HIGH SCORE</span>
             <span className="score-value">{gameState.highScore}</span>
           </div>
         </div>
@@ -94,11 +95,17 @@ export const Game = () => {
           onPointerLeave={handlePointerUp}
         />
 
+        {/* Ad placeholder */}
+        <div className="ad-placeholder">
+          <span className="ad-label">世俗の報せ (ADVERTISEMENT)</span>
+        </div>
+
         {/* Game over overlay */}
         {gameState.isGameOver && (
           <div className="game-over-overlay">
             <div className="game-over-content">
               <h2>GAME OVER</h2>
+              <p className="game-over-subtitle">悟りへの道は険しく...</p>
               <div className="final-scores">
                 <p>
                   <span>SCORE:</span>
@@ -116,25 +123,20 @@ export const Game = () => {
           </div>
         )}
 
-        {/* Uncle evolution guide */}
+        {/* Orb evolution guide */}
         <div className="evolution-guide">
-          <div className="guide-title">Evolution Guide</div>
+          <div className="guide-title">Soul Orb Evolution</div>
           <div className="guide-list">
-            {[
-              { emoji: '👴', name: '豆粒' },
-              { emoji: '🧘', name: '体育座り' },
-              { emoji: '🤸', name: '逆立ち' },
-              { emoji: '🤔', name: '腕組み' },
-              { emoji: '🍺', name: 'ビール腹' },
-              { emoji: '🏌️', name: 'ゴルフ' },
-              { emoji: '📰', name: '新聞' },
-              { emoji: '🌳', name: '盆栽' },
-              { emoji: '🎤', name: 'カラオケ' },
-              { emoji: '😡', name: 'ちゃぶ台' },
-              { emoji: '🙏', name: '大仏' },
-            ].map((uncle, idx) => (
-              <div key={idx} className="guide-item">
-                <span className="guide-emoji">{uncle.emoji}</span>
+            {ORBS.map((orb, idx) => (
+              <div
+                key={idx}
+                className="guide-item"
+                style={{
+                  background: `radial-gradient(circle, ${orb.color}40 0%, ${orb.glowColor}20 100%)`,
+                  boxShadow: `0 0 8px ${orb.glowColor}50`
+                }}
+              >
+                <span className="guide-emoji">{orb.emoji}</span>
               </div>
             ))}
           </div>

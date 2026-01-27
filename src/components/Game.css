@@ -5,7 +5,7 @@
   justify-content: center;
   min-height: 100vh;
   min-height: 100dvh;
-  background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+  background: linear-gradient(180deg, #050b1a 0%, #0c1929 50%, #0a1520 100%);
   padding: 10px;
   box-sizing: border-box;
 }
@@ -23,19 +23,23 @@
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 30px rgba(125, 211, 252, 0.2),
+    0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 /* Score display */
 .score-display {
   display: flex;
   justify-content: space-between;
-  padding: 10px 15px;
-  background: rgba(0, 0, 0, 0.8);
+  padding: 12px 15px;
+  background: linear-gradient(180deg, rgba(5, 11, 26, 0.95) 0%, rgba(10, 21, 32, 0.95) 100%);
   border-radius: 8px 8px 0 0;
   margin-bottom: -4px;
   position: relative;
   z-index: 1;
+  border: 1px solid rgba(125, 211, 252, 0.15);
+  border-bottom: none;
 }
 
 .score,
@@ -47,20 +51,41 @@
 
 .score-label {
   font-size: 10px;
-  color: #888;
+  color: rgba(125, 211, 252, 0.6);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .score-value {
   font-size: 24px;
   font-weight: bold;
-  color: #fff;
+  color: #E0F2FE;
   font-family: 'Courier New', monospace;
+  text-shadow: 0 0 10px rgba(125, 211, 252, 0.5);
 }
 
 .high-score .score-value {
-  color: #ffd700;
+  color: #FDE68A;
+  text-shadow: 0 0 10px rgba(253, 230, 138, 0.5);
+}
+
+/* Ad placeholder */
+.ad-placeholder {
+  background: linear-gradient(180deg, rgba(10, 21, 32, 0.9) 0%, rgba(5, 11, 26, 0.9) 100%);
+  border: 1px solid rgba(125, 211, 252, 0.1);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -4px;
+}
+
+.ad-label {
+  font-size: 11px;
+  color: rgba(125, 211, 252, 0.4);
+  letter-spacing: 1px;
 }
 
 /* Game over overlay */
@@ -70,12 +95,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(5, 11, 26, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
   animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(4px);
 }
 
 @keyframes fadeIn {
@@ -95,22 +121,31 @@
 
 .game-over-content h2 {
   font-size: 36px;
-  margin: 0 0 20px 0;
-  color: #ff6b6b;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  animation: shake 0.5s ease-in-out;
+  margin: 0 0 10px 0;
+  color: #FDE68A;
+  text-shadow:
+    0 0 20px rgba(253, 230, 138, 0.5),
+    2px 2px 4px rgba(0, 0, 0, 0.5);
+  animation: pulse 2s ease-in-out infinite;
 }
 
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
+.game-over-subtitle {
+  font-size: 14px;
+  color: rgba(125, 211, 252, 0.7);
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 20px rgba(253, 230, 138, 0.5),
+      2px 2px 4px rgba(0, 0, 0, 0.5);
   }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
+  50% {
+    text-shadow:
+      0 0 30px rgba(253, 230, 138, 0.8),
+      2px 2px 4px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -127,34 +162,41 @@
 }
 
 .final-scores span:first-child {
-  color: #888;
+  color: rgba(125, 211, 252, 0.6);
 }
 
 .final-score-value {
   font-weight: bold;
-  color: #ffd700;
+  color: #FDE68A;
   font-size: 24px;
   font-family: 'Courier New', monospace;
+  text-shadow: 0 0 10px rgba(253, 230, 138, 0.5);
 }
 
 .restart-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.2) 0%, rgba(94, 234, 212, 0.2) 100%);
+  color: #E0F2FE;
+  border: 1px solid rgba(125, 211, 252, 0.4);
   padding: 15px 40px;
   font-size: 18px;
   font-weight: bold;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow:
+    0 0 20px rgba(125, 211, 252, 0.2),
+    0 4px 15px rgba(0, 0, 0, 0.3);
   text-transform: uppercase;
   letter-spacing: 2px;
 }
 
 .restart-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.3) 0%, rgba(94, 234, 212, 0.3) 100%);
+  box-shadow:
+    0 0 30px rgba(125, 211, 252, 0.4),
+    0 6px 20px rgba(0, 0, 0, 0.4);
+  border-color: rgba(125, 211, 252, 0.6);
 }
 
 .restart-button:active {
@@ -164,18 +206,19 @@
 /* Evolution guide */
 .evolution-guide {
   margin-top: 15px;
-  background: rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, rgba(5, 11, 26, 0.8) 0%, rgba(10, 21, 32, 0.8) 100%);
   border-radius: 8px;
   padding: 10px;
+  border: 1px solid rgba(125, 211, 252, 0.1);
 }
 
 .guide-title {
-  color: #888;
-  font-size: 12px;
+  color: rgba(125, 211, 252, 0.6);
+  font-size: 11px;
   text-align: center;
   margin-bottom: 8px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .guide-list {
@@ -188,20 +231,20 @@
 .guide-item {
   width: 28px;
   height: 28px;
-  background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .guide-item::after {
-  content: '→';
+  content: '>';
   position: absolute;
-  right: -8px;
+  right: -7px;
   font-size: 8px;
-  color: #666;
+  color: rgba(125, 211, 252, 0.3);
 }
 
 .guide-item:last-child::after {
@@ -209,7 +252,7 @@
 }
 
 .guide-emoji {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 /* Responsive adjustments */
@@ -236,7 +279,15 @@
   }
 
   .guide-emoji {
-    font-size: 14px;
+    font-size: 12px;
+  }
+
+  .ad-placeholder {
+    height: 45px;
+  }
+
+  .ad-label {
+    font-size: 10px;
   }
 }
 
