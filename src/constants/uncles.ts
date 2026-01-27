@@ -4,7 +4,7 @@
 export interface OrbType {
   id: number;
   name: string;
-  nameJa: string;
+  displayName: string;
   emoji: string;
   radius: number;
   color: string;
@@ -20,7 +20,7 @@ export const ORBS: OrbType[] = [
   {
     id: 0,
     name: 'bubble',
-    nameJa: '泡',
+    displayName: 'Bubble',
     emoji: '🫧',
     radius: 20,
     color: '#E0F2FE',
@@ -31,7 +31,7 @@ export const ORBS: OrbType[] = [
   {
     id: 1,
     name: 'droplet',
-    nameJa: '雫',
+    displayName: 'Droplet',
     emoji: '💧',
     radius: 28,
     color: '#BAE6FD',
@@ -42,7 +42,7 @@ export const ORBS: OrbType[] = [
   {
     id: 2,
     name: 'lotus-sprout',
-    nameJa: '蓮の芽',
+    displayName: 'Sprout',
     emoji: '🌱',
     radius: 36,
     color: '#5EEAD4',
@@ -53,7 +53,7 @@ export const ORBS: OrbType[] = [
   {
     id: 3,
     name: 'lotus',
-    nameJa: '蓮華',
+    displayName: 'Lotus',
     emoji: '🪷',
     radius: 44,
     color: '#F9A8D4',
@@ -64,7 +64,7 @@ export const ORBS: OrbType[] = [
   {
     id: 4,
     name: 'om',
-    nameJa: '梵字',
+    displayName: 'Om',
     emoji: 'ॐ',
     radius: 52,
     color: '#FDE047',
@@ -75,7 +75,7 @@ export const ORBS: OrbType[] = [
   {
     id: 5,
     name: 'mudra',
-    nameJa: '慈悲の印',
+    displayName: 'Mudra',
     emoji: '🫱',
     radius: 62,
     color: '#818CF8',
@@ -86,7 +86,7 @@ export const ORBS: OrbType[] = [
   {
     id: 6,
     name: 'third-eye',
-    nameJa: '第三の眼',
+    displayName: 'Third Eye',
     emoji: '👁️',
     radius: 72,
     color: '#A855F7',
@@ -97,7 +97,7 @@ export const ORBS: OrbType[] = [
   {
     id: 7,
     name: 'mandala',
-    nameJa: '曼荼羅',
+    displayName: 'Mandala',
     emoji: '🔆',
     radius: 84,
     color: '#FB923C',
@@ -108,7 +108,7 @@ export const ORBS: OrbType[] = [
   {
     id: 8,
     name: 'light-particle',
-    nameJa: '光の粒子',
+    displayName: 'Light',
     emoji: '✨',
     radius: 96,
     color: '#FFFFFF',
@@ -119,7 +119,7 @@ export const ORBS: OrbType[] = [
   {
     id: 9,
     name: 'infinity',
-    nameJa: '全一',
+    displayName: 'Infinity',
     emoji: '♾️',
     radius: 110,
     color: '#FDE68A',
@@ -130,7 +130,7 @@ export const ORBS: OrbType[] = [
   {
     id: 10,
     name: 'enlightenment',
-    nameJa: '悟り',
+    displayName: 'Nirvana',
     emoji: '👁‍🗨',
     radius: 130,
     color: '#FEF3C7',

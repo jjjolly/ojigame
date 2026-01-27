@@ -97,7 +97,7 @@ export const Game = () => {
 
         {/* Ad placeholder */}
         <div className="ad-placeholder">
-          <span className="ad-label">世俗の報せ (ADVERTISEMENT)</span>
+          <span className="ad-label">ADVERTISEMENT</span>
         </div>
 
         {/* Game over overlay */}
@@ -105,7 +105,7 @@ export const Game = () => {
           <div className="game-over-overlay">
             <div className="game-over-content">
               <h2>GAME OVER</h2>
-              <p className="game-over-subtitle">悟りへの道は険しく...</p>
+              <p className="game-over-subtitle">The path to enlightenment is steep...</p>
               <div className="final-scores">
                 <p>
                   <span>SCORE:</span>

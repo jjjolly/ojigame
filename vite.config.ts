@@ -10,14 +10,14 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'OjiGame - おじさん積み上げパズル',
-        short_name: 'OjiGame',
-        description: 'Uncle stacking puzzle game - Stack and evolve uncles in this Suika-style physics puzzle game!',
+        name: 'Soul Orbs - Spiritual Puzzle Game',
+        short_name: 'Soul Orbs',
+        description: 'A meditative puzzle game. Merge spiritual orbs and reach enlightenment!',
         start_url: '/',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#1a252f',
-        theme_color: '#1a252f',
+        background_color: '#050b1a',
+        theme_color: '#050b1a',
         icons: [
           {
             src: '/icon-192.png',
@@ -38,7 +38,7 @@ export default defineConfig({
           },
         ],
         categories: ['games', 'entertainment'],
-        lang: 'ja',
+        lang: 'en',
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
