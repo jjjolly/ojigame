@@ -30,15 +30,15 @@ interface GameState {
   nextOrb: OrbType;
   dropX: number;
   canDrop: boolean;
-  goldenFlash: number;
+  glitchFlash: number;
 }
 
-const HIGH_SCORE_KEY = 'ojigame_highscore';
-const BALL_GRACE_PERIOD_MS = 1500; // 1.5 second grace period per ball
+const HIGH_SCORE_KEY = 'deepmerge_highscore';
+const BALL_GRACE_PERIOD_MS = 1500;
 
 // Background animation state
-let backgroundRotation = 0;
 let frameCount = 0;
+let glitchOffset = 0;
 
 export const useGame = () => {
   const engineRef = useRef<Matter.Engine | null>(null);
@@ -54,7 +54,7 @@ export const useGame = () => {
     nextOrb: getRandomSpawnableOrb(),
     dropX: GAME_WIDTH / 2,
     canDrop: true,
-    goldenFlash: 0,
+    glitchFlash: 0,
   });
 
   const [displayState, setDisplayState] = useState<GameState>(stateRef.current);
@@ -93,21 +93,17 @@ export const useGame = () => {
       const orb = ORBS[orbBody.orbId];
       if (!orb) continue;
 
-      // Skip balls still in grace period
       const age = orbBody.createdAt ? now - orbBody.createdAt : Infinity;
       if (age < BALL_GRACE_PERIOD_MS) {
         continue;
       }
 
-      // Check if the CENTER of the ball is above the game over line (more lenient)
       const orbCenter = orbBody.position.y;
       if (orbCenter < GAME_OVER_LINE_Y) {
-        // Ball center is above the line - check if it has settled
         const speed = Math.sqrt(
           orbBody.velocity.x * orbBody.velocity.x +
           orbBody.velocity.y * orbBody.velocity.y
         );
-        // Game over if ball is moving very slowly (well settled)
         if (speed < 2.0) {
           return true;
         }
@@ -117,97 +113,175 @@ export const useGame = () => {
     return false;
   };
 
-  const drawBackground = (ctx: CanvasRenderingContext2D) => {
-    // Deep sea gradient background
+  const drawLiminalBackground = (ctx: CanvasRenderingContext2D) => {
+    // Dark purple/pink gradient base
     const gradient = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT);
-    gradient.addColorStop(0, THEME.backgroundGradientStart);
-    gradient.addColorStop(1, THEME.backgroundGradientEnd);
+    gradient.addColorStop(0, '#2d1b4e');
+    gradient.addColorStop(0.5, '#1a0a2e');
+    gradient.addColorStop(1, '#0a0a1a');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    // Rotating geometric patterns (sacred geometry style)
+    // Perspective floor tiles
     ctx.save();
-    ctx.globalAlpha = 0.08;
-    ctx.strokeStyle = '#4A90A4';
+    const vanishY = 150;
+    const floorStart = 350;
+
+    // Floor gradient
+    const floorGradient = ctx.createLinearGradient(0, floorStart, 0, GAME_HEIGHT);
+    floorGradient.addColorStop(0, '#1a1a2e');
+    floorGradient.addColorStop(1, '#0d0d1a');
+    ctx.fillStyle = floorGradient;
+    ctx.beginPath();
+    ctx.moveTo(0, floorStart);
+    ctx.lineTo(GAME_WIDTH, floorStart);
+    ctx.lineTo(GAME_WIDTH, GAME_HEIGHT);
+    ctx.lineTo(0, GAME_HEIGHT);
+    ctx.fill();
+
+    // Grid lines on floor
+    ctx.strokeStyle = 'rgba(0, 255, 255, 0.15)';
     ctx.lineWidth = 1;
 
-    const centerX = GAME_WIDTH / 2;
-    const centerY = GAME_HEIGHT / 2;
-
-    // Outer rotating circle pattern
-    ctx.translate(centerX, centerY);
-    ctx.rotate(backgroundRotation * 0.5);
-    ctx.translate(-centerX, -centerY);
-
-    // Draw multiple concentric geometric shapes
-    for (let ring = 0; ring < 5; ring++) {
-      const radius = 80 + ring * 60;
-      const points = 6 + ring * 2;
-
+    // Horizontal lines with perspective
+    for (let i = 0; i < 10; i++) {
+      const y = floorStart + (GAME_HEIGHT - floorStart) * (i / 10);
+      const perspective = (y - vanishY) / (GAME_HEIGHT - vanishY);
+      ctx.globalAlpha = 0.1 + perspective * 0.2;
       ctx.beginPath();
-      for (let i = 0; i <= points; i++) {
-        const angle = (Math.PI * 2 * i) / points;
-        const x = centerX + Math.cos(angle) * radius;
-        const y = centerY + Math.sin(angle) * radius;
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      }
-      ctx.stroke();
-
-      // Inner connecting lines
-      if (ring > 0) {
-        const prevRadius = 80 + (ring - 1) * 60;
-        for (let i = 0; i < points; i++) {
-          const angle = (Math.PI * 2 * i) / points;
-          ctx.beginPath();
-          ctx.moveTo(centerX + Math.cos(angle) * prevRadius, centerY + Math.sin(angle) * prevRadius);
-          ctx.lineTo(centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius);
-          ctx.stroke();
-        }
-      }
-    }
-
-    ctx.restore();
-
-    // Counter-rotating inner pattern
-    ctx.save();
-    ctx.globalAlpha = 0.05;
-    ctx.strokeStyle = '#7DD3FC';
-    ctx.lineWidth = 1;
-
-    ctx.translate(centerX, centerY);
-    ctx.rotate(-backgroundRotation);
-    ctx.translate(-centerX, -centerY);
-
-    // Flower of life style circles
-    for (let i = 0; i < 6; i++) {
-      const angle = (Math.PI * 2 * i) / 6;
-      const x = centerX + Math.cos(angle) * 100;
-      const y = centerY + Math.sin(angle) * 100;
-      ctx.beginPath();
-      ctx.arc(x, y, 100, 0, Math.PI * 2);
+      ctx.moveTo(0, y);
+      ctx.lineTo(GAME_WIDTH, y);
       ctx.stroke();
     }
 
+    // Vertical lines converging to vanishing point
+    ctx.globalAlpha = 0.2;
+    for (let i = 0; i <= 8; i++) {
+      const x = (GAME_WIDTH / 8) * i;
+      ctx.beginPath();
+      ctx.moveTo(GAME_WIDTH / 2, vanishY);
+      ctx.lineTo(x, GAME_HEIGHT);
+      ctx.stroke();
+    }
     ctx.restore();
 
-    // Floating particles in background
+    // Neon ceiling lines
+    ctx.save();
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = THEME.neonCyan;
+    ctx.strokeStyle = THEME.neonCyan;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.8;
+
+    // Left ceiling line
+    ctx.beginPath();
+    ctx.moveTo(0, 80);
+    ctx.lineTo(GAME_WIDTH / 2 - 50, vanishY - 20);
+    ctx.stroke();
+
+    // Right ceiling line
+    ctx.beginPath();
+    ctx.moveTo(GAME_WIDTH, 80);
+    ctx.lineTo(GAME_WIDTH / 2 + 50, vanishY - 20);
+    ctx.stroke();
+
+    // Pink neon accents
+    ctx.shadowColor = THEME.neonPink;
+    ctx.strokeStyle = THEME.neonPink;
+    ctx.lineWidth = 1.5;
+
+    ctx.beginPath();
+    ctx.moveTo(30, 100);
+    ctx.lineTo(GAME_WIDTH / 2 - 30, vanishY);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(GAME_WIDTH - 30, 100);
+    ctx.lineTo(GAME_WIDTH / 2 + 30, vanishY);
+    ctx.stroke();
+    ctx.restore();
+
+    // Floating kawaii elements
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    const time = frameCount * 0.02;
+
+    // Hearts
+    ctx.fillStyle = '#FF69B4';
+    ctx.font = '16px Arial';
+    ctx.fillText('♥', 50 + Math.sin(time) * 10, 200 + Math.cos(time * 0.7) * 15);
+    ctx.fillText('♥', 320 + Math.sin(time + 1) * 10, 180 + Math.cos(time * 0.8) * 15);
+
+    // Stars
+    ctx.fillStyle = '#FFD700';
+    ctx.fillText('★', 80 + Math.sin(time + 2) * 8, 150 + Math.cos(time * 0.6) * 12);
+    ctx.fillText('☆', 300 + Math.sin(time + 3) * 8, 220 + Math.cos(time * 0.9) * 12);
+
+    // Clouds
+    ctx.fillStyle = '#87CEEB';
+    ctx.fillText('☁', 150 + Math.sin(time * 0.5) * 15, 170 + Math.cos(time * 0.4) * 8);
+
+    // Japanese characters floating
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.font = '12px Arial';
+    const chars = ['カ', 'ワ', 'イ', 'イ', '夢'];
+    chars.forEach((char, i) => {
+      const x = 60 + i * 70 + Math.sin(time + i) * 5;
+      const y = 250 + Math.cos(time * 0.5 + i) * 20;
+      ctx.fillText(char, x, y);
+    });
+    ctx.restore();
+
+    // Scanlines effect
+    ctx.save();
+    ctx.globalAlpha = 0.03;
+    ctx.fillStyle = '#000';
+    for (let y = 0; y < GAME_HEIGHT; y += 3) {
+      ctx.fillRect(0, y, GAME_WIDTH, 1);
+    }
+    ctx.restore();
+
+    // Random glitch offset
+    if (Math.random() < 0.02) {
+      glitchOffset = (Math.random() - 0.5) * 10;
+    } else {
+      glitchOffset *= 0.9;
+    }
+
+    // VHS noise at edges
+    ctx.save();
+    ctx.globalAlpha = 0.1;
+    for (let i = 0; i < 50; i++) {
+      const x = Math.random() * GAME_WIDTH;
+      const y = Math.random() * GAME_HEIGHT;
+      const size = Math.random() * 2;
+      ctx.fillStyle = Math.random() > 0.5 ? '#FF69B4' : '#00FFFF';
+      ctx.fillRect(x, y, size, size);
+    }
+    ctx.restore();
+
+    // Disco ball hint at top
     ctx.save();
     ctx.globalAlpha = 0.3;
-    for (let i = 0; i < 20; i++) {
-      const x = (Math.sin(frameCount * 0.01 + i * 0.5) * 0.5 + 0.5) * GAME_WIDTH;
-      const y = ((frameCount * 0.3 + i * 50) % (GAME_HEIGHT + 20)) - 10;
-      const size = 1 + Math.sin(frameCount * 0.05 + i) * 0.5;
+    ctx.fillStyle = '#C0C0C0';
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(GAME_WIDTH / 2, 30, 12, 0, Math.PI * 2);
+    ctx.fill();
 
-      ctx.fillStyle = '#7DD3FC';
-      ctx.shadowBlur = 5;
-      ctx.shadowColor = '#7DD3FC';
+    // Reflection lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      const angle = (frameCount * 0.02 + i * Math.PI * 0.4) % (Math.PI * 2);
       ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(GAME_WIDTH / 2, 30);
+      ctx.lineTo(
+        GAME_WIDTH / 2 + Math.cos(angle) * 100,
+        30 + Math.sin(angle) * 100
+      );
+      ctx.stroke();
     }
     ctx.restore();
   };
@@ -221,37 +295,48 @@ export const useGame = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Update animation
-    backgroundRotation += 0.002;
     frameCount++;
 
-    // Draw background
-    drawBackground(ctx);
-
-    // Golden flash effect for enlightenment
-    if (state.goldenFlash > 0) {
-      ctx.fillStyle = `rgba(253, 230, 138, ${state.goldenFlash / 60 * 0.4})`;
-      ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-      stateRef.current.goldenFlash = Math.max(0, state.goldenFlash - 1);
+    // Apply glitch offset occasionally
+    ctx.save();
+    if (Math.abs(glitchOffset) > 0.5) {
+      ctx.translate(glitchOffset, 0);
     }
 
-    // Game over line
+    // Draw liminal background
+    drawLiminalBackground(ctx);
+
+    // Glitch flash effect on merge
+    if (state.glitchFlash > 0) {
+      ctx.fillStyle = `rgba(255, 105, 180, ${state.glitchFlash / 30 * 0.3})`;
+      ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+      stateRef.current.glitchFlash = Math.max(0, state.glitchFlash - 1);
+    }
+
+    ctx.restore();
+
+    // Game over line with glitch effect
     ctx.strokeStyle = THEME.gameOverLine;
     ctx.lineWidth = 2;
     ctx.setLineDash([10, 10]);
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = THEME.neonPink;
     ctx.beginPath();
     ctx.moveTo(0, GAME_OVER_LINE_Y);
     ctx.lineTo(GAME_WIDTH, GAME_OVER_LINE_Y);
     ctx.stroke();
     ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
 
     // Preview orb
     if (!state.isGameOver && state.canDrop) {
       const orb = state.currentOrb;
-      ctx.globalAlpha = 0.6;
+      ctx.globalAlpha = 0.7;
 
-      // Guide line
+      // Guide line with neon effect
       ctx.strokeStyle = THEME.guideLine;
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = THEME.neonCyan;
       ctx.lineWidth = 1;
       ctx.setLineDash([5, 5]);
       ctx.beginPath();
@@ -273,7 +358,7 @@ export const useGame = () => {
 
       // Emoji
       ctx.fillStyle = '#000';
-      ctx.font = `${Math.max(16, orb.radius * 0.8)}px Arial`;
+      ctx.font = `${Math.max(20, orb.radius * 0.7)}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(orb.emoji, state.dropX, DROP_AREA_HEIGHT / 2);
@@ -304,44 +389,46 @@ export const useGame = () => {
       ctx.fillStyle = orb.color;
       ctx.fill();
 
-      // Inner glow gradient
-      const innerGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, orb.radius);
+      // Inner gradient for depth
+      const innerGradient = ctx.createRadialGradient(
+        -orb.radius * 0.3, -orb.radius * 0.3, 0,
+        0, 0, orb.radius
+      );
       innerGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
       innerGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
-      innerGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      innerGradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
       ctx.fillStyle = innerGradient;
       ctx.fill();
 
       ctx.shadowBlur = 0;
 
       // Emoji
-      ctx.fillStyle = orb.id >= 8 ? '#333' : '#000';
-      ctx.font = `${Math.max(16, orb.radius * 0.8)}px Arial`;
+      ctx.fillStyle = '#000';
+      ctx.font = `${Math.max(20, orb.radius * 0.7)}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(orb.emoji, 0, 0);
 
-      // Special effect for enlightenment orb
-      if (orb.id === 10) {
-        ctx.shadowBlur = 30;
-        ctx.shadowColor = '#FDE68A';
-        ctx.beginPath();
-        ctx.arc(0, 0, orb.radius + 8, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(253, 230, 138, 0.5)';
-        ctx.lineWidth = 4;
-        ctx.stroke();
-
-        // Rotating aura
-        ctx.rotate(backgroundRotation * 2);
-        ctx.strokeStyle = 'rgba(253, 230, 138, 0.3)';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 8; i++) {
-          const angle = (Math.PI * 2 * i) / 8;
-          ctx.beginPath();
-          ctx.moveTo(Math.cos(angle) * (orb.radius + 12), Math.sin(angle) * (orb.radius + 12));
-          ctx.lineTo(Math.cos(angle) * (orb.radius + 25), Math.sin(angle) * (orb.radius + 25));
-          ctx.stroke();
+      // Special effect for TV head (final evolution)
+      if (orb.id === 5) {
+        // Static noise effect
+        ctx.globalAlpha = 0.3;
+        for (let i = 0; i < 20; i++) {
+          const nx = (Math.random() - 0.5) * orb.radius * 1.5;
+          const ny = (Math.random() - 0.5) * orb.radius * 1.5;
+          ctx.fillStyle = Math.random() > 0.5 ? '#FFF' : '#000';
+          ctx.fillRect(nx, ny, 3, 3);
         }
+        ctx.globalAlpha = 1;
+
+        // Glowing ring
+        ctx.strokeStyle = THEME.neonCyan;
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = THEME.neonCyan;
+        ctx.beginPath();
+        ctx.arc(0, 0, orb.radius + 5, 0, Math.PI * 2);
+        ctx.stroke();
       }
 
       ctx.restore();
@@ -351,30 +438,33 @@ export const useGame = () => {
     particleSystem.update();
     particleSystem.draw(ctx);
 
-    // Next orb preview
+    // Next orb preview box
     const nextOrb = state.nextOrb;
-    ctx.fillStyle = 'rgba(10, 20, 40, 0.7)';
-    ctx.fillRect(GAME_WIDTH - 70, 10, 60, 60);
-    ctx.strokeStyle = 'rgba(125, 211, 252, 0.3)';
+    ctx.fillStyle = 'rgba(26, 10, 46, 0.8)';
+    ctx.strokeStyle = THEME.neonPink;
     ctx.lineWidth = 1;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = THEME.neonPink;
+    ctx.fillRect(GAME_WIDTH - 70, 10, 60, 60);
     ctx.strokeRect(GAME_WIDTH - 70, 10, 60, 60);
+    ctx.shadowBlur = 0;
 
-    ctx.fillStyle = 'rgba(125, 211, 252, 0.8)';
-    ctx.font = '10px Arial';
+    ctx.fillStyle = THEME.neonCyan;
+    ctx.font = '10px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('NEXT', GAME_WIDTH - 40, 22);
 
-    // Mini orb preview with glow
+    // Mini orb preview
     ctx.shadowBlur = 8;
     ctx.shadowColor = nextOrb.glowColor;
     ctx.beginPath();
-    ctx.arc(GAME_WIDTH - 40, 48, Math.min(18, nextOrb.radius * 0.45), 0, Math.PI * 2);
+    ctx.arc(GAME_WIDTH - 40, 48, Math.min(18, nextOrb.radius * 0.4), 0, Math.PI * 2);
     ctx.fillStyle = nextOrb.color;
     ctx.fill();
     ctx.shadowBlur = 0;
 
     ctx.fillStyle = '#000';
-    ctx.font = '14px Arial';
+    ctx.font = '16px Arial';
     ctx.fillText(nextOrb.emoji, GAME_WIDTH - 40, 50);
   };
 
@@ -461,8 +551,8 @@ export const useGame = () => {
 
           soundManager.playMergeSound(ORBS[orbId].soundType);
 
-          const isEnlightenment = nextOrb.id === 10;
-          particleSystem.createMergeParticles(midX, midY, nextOrb.glowColor, isEnlightenment);
+          const isFinalForm = nextOrb.id === 5;
+          particleSystem.createMergeParticles(midX, midY, nextOrb.glowColor, isFinalForm);
 
           const newScore = stateRef.current.score + nextOrb.score;
           const newHighScore = Math.max(newScore, stateRef.current.highScore);
@@ -474,7 +564,7 @@ export const useGame = () => {
           setState({
             score: newScore,
             highScore: newHighScore,
-            goldenFlash: isEnlightenment ? 60 : stateRef.current.goldenFlash,
+            glitchFlash: isFinalForm ? 30 : 15,
           });
         }
       }
@@ -523,8 +613,8 @@ export const useGame = () => {
     }
 
     particleSystem.clear();
-    backgroundRotation = 0;
     frameCount = 0;
+    glitchOffset = 0;
 
     const newState: GameState = {
       score: 0,
@@ -534,7 +624,7 @@ export const useGame = () => {
       nextOrb: getRandomSpawnableOrb(),
       dropX: GAME_WIDTH / 2,
       canDrop: true,
-      goldenFlash: 0,
+      glitchFlash: 0,
     };
     stateRef.current = newState;
     setDisplayState({ ...newState });

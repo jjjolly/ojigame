@@ -17,7 +17,6 @@ export const Game = () => {
     GAME_HEIGHT,
   } = useGame();
 
-  // Initialize game on mount (empty deps to run only once)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
@@ -26,7 +25,6 @@ export const Game = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle touch/mouse events for positioning
   const getGameX = useCallback(
     (clientX: number): number => {
       if (!containerRef.current) return GAME_WIDTH / 2;
@@ -48,9 +46,7 @@ export const Game = () => {
 
   const handlePointerDown = useCallback(
     async (e: React.PointerEvent) => {
-      // Resume audio context on first interaction
       await soundManager.resume();
-
       if (gameState.isGameOver) return;
       const x = getGameX(e.clientX);
       updateDropX(x);
@@ -77,8 +73,11 @@ export const Game = () => {
             <span className="score-label">SCORE</span>
             <span className="score-value">{gameState.score}</span>
           </div>
+          <div className="game-title">
+            <span className="title-text">DEEP MERGE</span>
+          </div>
           <div className="high-score">
-            <span className="score-label">HIGH SCORE</span>
+            <span className="score-label">BEST</span>
             <span className="score-value">{gameState.highScore}</span>
           </div>
         </div>
@@ -97,43 +96,43 @@ export const Game = () => {
 
         {/* Ad placeholder */}
         <div className="ad-placeholder">
-          <span className="ad-label">ADVERTISEMENT</span>
+          <span className="ad-label">[ ADVERTISEMENT ]</span>
         </div>
 
         {/* Game over overlay */}
         {gameState.isGameOver && (
           <div className="game-over-overlay">
             <div className="game-over-content">
-              <h2>GAME OVER</h2>
-              <p className="game-over-subtitle">The path to enlightenment is steep...</p>
+              <h2 className="glitch-text" data-text="GAME OVER">GAME OVER</h2>
+              <p className="game-over-subtitle">the void consumes all...</p>
               <div className="final-scores">
                 <p>
                   <span>SCORE:</span>
                   <span className="final-score-value">{gameState.score}</span>
                 </p>
                 <p>
-                  <span>HIGH SCORE:</span>
+                  <span>BEST:</span>
                   <span className="final-score-value">{gameState.highScore}</span>
                 </p>
               </div>
               <button className="restart-button" onClick={handleRestart}>
-                RESTART
+                AGAIN?
               </button>
             </div>
           </div>
         )}
 
-        {/* Orb evolution guide */}
+        {/* Evolution guide */}
         <div className="evolution-guide">
-          <div className="guide-title">Soul Orb Evolution</div>
+          <div className="guide-title">MERGE CHART</div>
           <div className="guide-list">
             {ORBS.map((orb, idx) => (
               <div
                 key={idx}
                 className="guide-item"
                 style={{
-                  background: `radial-gradient(circle, ${orb.color}40 0%, ${orb.glowColor}20 100%)`,
-                  boxShadow: `0 0 8px ${orb.glowColor}50`
+                  background: `radial-gradient(circle, ${orb.color}60 0%, ${orb.glowColor}30 100%)`,
+                  boxShadow: `0 0 10px ${orb.glowColor}80`
                 }}
               >
                 <span className="guide-emoji">{orb.emoji}</span>

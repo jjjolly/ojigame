@@ -5,13 +5,13 @@
 }
 
 :root {
-  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Courier New', monospace;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark;
-  color: rgba(224, 242, 254, 0.87);
-  background-color: #050b1a;
+  color: rgba(255, 105, 180, 0.87);
+  background-color: #1a0a2e;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -27,7 +27,7 @@ body {
   height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
-  background: linear-gradient(180deg, #050b1a 0%, #0c1929 100%);
+  background: linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 50%, #0a0a1a 100%);
 }
 
 #root {
@@ -47,25 +47,25 @@ body {
 
 /* Button reset */
 button {
-  border-radius: 8px;
-  border: 1px solid rgba(125, 211, 252, 0.3);
+  border-radius: 0;
+  border: 2px solid #00FFFF;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
-  font-family: inherit;
+  font-family: monospace;
   cursor: pointer;
   transition: all 0.25s;
-  background: rgba(125, 211, 252, 0.1);
-  color: #E0F2FE;
+  background: transparent;
+  color: #00FFFF;
 }
 
 button:hover {
-  background: rgba(125, 211, 252, 0.2);
-  border-color: rgba(125, 211, 252, 0.5);
+  background: rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
 }
 
 button:focus,
 button:focus-visible {
   outline: none;
-  box-shadow: 0 0 10px rgba(125, 211, 252, 0.3);
+  box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
 }

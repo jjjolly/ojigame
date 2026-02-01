@@ -10,14 +10,14 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Soul Orbs - Spiritual Puzzle Game',
-        short_name: 'Soul Orbs',
-        description: 'A meditative puzzle game. Merge spiritual orbs and reach enlightenment!',
+        name: 'Deep Merge - Weirdcore Puzzle',
+        short_name: 'Deep Merge',
+        description: 'A weirdcore puzzle game. Merge strange objects in an empty mall. How far can you go?',
         start_url: '/',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#050b1a',
-        theme_color: '#050b1a',
+        background_color: '#1a0a2e',
+        theme_color: '#1a0a2e',
         icons: [
           {
             src: '/icon-192.png',

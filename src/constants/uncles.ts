@@ -1,5 +1,5 @@
-// Soul Orb definitions - 11 evolution stages
-// Deep Sea Spiritual theme - each orb represents a stage of spiritual awakening
+// Weird Object definitions - 6 evolution stages
+// Weirdcore/Traumacore theme - liminal space shopping mall aesthetic
 
 export interface OrbType {
   id: number;
@@ -10,7 +10,7 @@ export interface OrbType {
   color: string;
   glowColor: string;
   score: number;
-  soundType: 'light' | 'medium' | 'deep' | 'enlightenment';
+  soundType: 'giggle' | 'whisper' | 'distorted' | 'void';
 }
 
 // Backward compatibility alias
@@ -19,124 +19,69 @@ export type UncleType = OrbType;
 export const ORBS: OrbType[] = [
   {
     id: 0,
-    name: 'bubble',
-    displayName: 'Bubble',
-    emoji: '🫧',
-    radius: 20,
-    color: '#E0F2FE',
-    glowColor: '#BAE6FD',
+    name: 'legged-toothbrush',
+    displayName: 'Brushy',
+    emoji: '🪥',
+    radius: 25,
+    color: '#FF69B4',
+    glowColor: '#FF1493',
     score: 1,
-    soundType: 'light',
+    soundType: 'giggle',
   },
   {
     id: 1,
-    name: 'droplet',
-    displayName: 'Droplet',
-    emoji: '💧',
-    radius: 28,
-    color: '#BAE6FD',
-    glowColor: '#7DD3FC',
-    score: 3,
-    soundType: 'light',
+    name: 'eyeball-dice',
+    displayName: 'Dicey',
+    emoji: '🎲',
+    radius: 38,
+    color: '#00FFFF',
+    glowColor: '#00CED1',
+    score: 5,
+    soundType: 'giggle',
   },
   {
     id: 2,
-    name: 'lotus-sprout',
-    displayName: 'Sprout',
-    emoji: '🌱',
-    radius: 36,
-    color: '#5EEAD4',
-    glowColor: '#2DD4BF',
-    score: 6,
-    soundType: 'light',
+    name: 'floating-ear',
+    displayName: 'Listener',
+    emoji: '👂',
+    radius: 52,
+    color: '#FFB6C1',
+    glowColor: '#FF69B4',
+    score: 15,
+    soundType: 'whisper',
   },
   {
     id: 3,
-    name: 'lotus',
-    displayName: 'Lotus',
-    emoji: '🪷',
-    radius: 44,
-    color: '#F9A8D4',
-    glowColor: '#F472B6',
-    score: 10,
-    soundType: 'light',
+    name: 'smiling-statue',
+    displayName: 'Friend',
+    emoji: '🗿',
+    radius: 70,
+    color: '#E6E6FA',
+    glowColor: '#DDA0DD',
+    score: 30,
+    soundType: 'whisper',
   },
   {
     id: 4,
-    name: 'om',
-    displayName: 'Om',
-    emoji: 'ॐ',
-    radius: 52,
-    color: '#FDE047',
-    glowColor: '#FACC15',
-    score: 15,
-    soundType: 'medium',
+    name: 'giant-mushroom',
+    displayName: 'Funguy',
+    emoji: '🍄',
+    radius: 90,
+    color: '#DA70D6',
+    glowColor: '#BA55D3',
+    score: 50,
+    soundType: 'distorted',
   },
   {
     id: 5,
-    name: 'mudra',
-    displayName: 'Mudra',
-    emoji: '🫱',
-    radius: 62,
-    color: '#818CF8',
-    glowColor: '#6366F1',
-    score: 21,
-    soundType: 'medium',
-  },
-  {
-    id: 6,
-    name: 'third-eye',
-    displayName: 'Third Eye',
-    emoji: '👁️',
-    radius: 72,
-    color: '#A855F7',
-    glowColor: '#9333EA',
-    score: 28,
-    soundType: 'medium',
-  },
-  {
-    id: 7,
-    name: 'mandala',
-    displayName: 'Mandala',
-    emoji: '🔆',
-    radius: 84,
-    color: '#FB923C',
-    glowColor: '#F97316',
-    score: 36,
-    soundType: 'deep',
-  },
-  {
-    id: 8,
-    name: 'light-particle',
-    displayName: 'Light',
-    emoji: '✨',
-    radius: 96,
+    name: 'tv-head',
+    displayName: '???',
+    emoji: '📺',
+    radius: 115,
     color: '#FFFFFF',
-    glowColor: '#E0E7FF',
-    score: 45,
-    soundType: 'deep',
-  },
-  {
-    id: 9,
-    name: 'infinity',
-    displayName: 'Infinity',
-    emoji: '♾️',
-    radius: 110,
-    color: '#FDE68A',
-    glowColor: '#FCD34D',
-    score: 55,
-    soundType: 'deep',
-  },
-  {
-    id: 10,
-    name: 'enlightenment',
-    displayName: 'Nirvana',
-    emoji: '👁‍🗨',
-    radius: 130,
-    color: '#FEF3C7',
-    glowColor: '#FDE68A',
+    glowColor: '#00FFFF',
     score: 100,
-    soundType: 'enlightenment',
+    soundType: 'void',
   },
 ];
 
@@ -145,38 +90,41 @@ export const UNCLES = ORBS;
 
 // Game constants
 export const GAME_WIDTH = 400;
-export const GAME_HEIGHT = 600; // Reduced to make room for ad
+export const GAME_HEIGHT = 600;
 export const WALL_THICKNESS = 20;
 export const GAME_OVER_LINE_Y = 100;
 export const DROP_AREA_HEIGHT = 80;
 
 // The maximum orb type that can spawn (excluding the largest ones)
-export const MAX_SPAWN_ORB_ID = 4;
-export const MAX_SPAWN_UNCLE_ID = MAX_SPAWN_ORB_ID; // Backward compatibility
+export const MAX_SPAWN_ORB_ID = 2;
+export const MAX_SPAWN_UNCLE_ID = MAX_SPAWN_ORB_ID;
 
-// Physics constants
+// Physics constants - sticky/gooey feel
 export const PHYSICS_CONFIG = {
-  friction: 0.3,
-  frictionStatic: 0.5,
-  restitution: 0.2,
-  density: 0.001,
+  friction: 0.8,
+  frictionStatic: 0.9,
+  restitution: 0.05,
+  density: 0.002,
 };
 
-// Deep sea theme colors
+// Weirdcore/Liminal theme colors
 export const THEME = {
-  background: '#050b1a',
-  backgroundGradientStart: '#050b1a',
-  backgroundGradientEnd: '#0c1929',
-  gameOverLine: 'rgba(255, 100, 100, 0.6)',
-  guideLine: 'rgba(255, 255, 255, 0.15)',
-  glowIntensity: 20,
+  background: '#1a0a2e',
+  backgroundGradientStart: '#2d1b4e',
+  backgroundGradientEnd: '#0a0a1a',
+  neonPink: '#FF69B4',
+  neonCyan: '#00FFFF',
+  neonPurple: '#DA70D6',
+  gameOverLine: 'rgba(255, 105, 180, 0.6)',
+  guideLine: 'rgba(0, 255, 255, 0.3)',
+  glowIntensity: 25,
 };
 
 // Get orb by ID
 export const getOrbById = (id: number): OrbType | undefined => {
   return ORBS.find((orb) => orb.id === id);
 };
-export const getUncleById = getOrbById; // Backward compatibility
+export const getUncleById = getOrbById;
 
 // Get next evolution orb
 export const getNextEvolution = (id: number): OrbType | undefined => {
@@ -189,4 +137,4 @@ export const getRandomSpawnableOrb = (): OrbType => {
   const randomId = Math.floor(Math.random() * (MAX_SPAWN_ORB_ID + 1));
   return ORBS[randomId];
 };
-export const getRandomSpawnableUncle = getRandomSpawnableOrb; // Backward compatibility
+export const getRandomSpawnableUncle = getRandomSpawnableOrb;

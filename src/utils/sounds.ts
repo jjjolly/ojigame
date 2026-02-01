@@ -1,5 +1,5 @@
 // Sound utilities using Web Audio API
-// Creates synthesized singing bowl sounds for the spiritual theme
+// Weirdcore/Traumacore theme - creepy giggles, whispers, distorted sounds
 
 class SoundManager {
   private audioContext: AudioContext | null = null;
@@ -20,7 +20,6 @@ class SoundManager {
     return this.isEnabled;
   }
 
-  // Resume audio context (needed for mobile browsers)
   public async resume(): Promise<void> {
     const ctx = this.getAudioContext();
     if (ctx.state === 'suspended') {
@@ -28,67 +27,205 @@ class SoundManager {
     }
   }
 
-  // Create a singing bowl tone with harmonics
-  private playSingingBowl(
-    baseFreq: number,
-    duration: number,
-    volume: number = 0.3,
-    harmonicRichness: number = 1
-  ): void {
+  // Creepy giggle sound
+  private playGiggle(): void {
     const ctx = this.getAudioContext();
     const now = ctx.currentTime;
 
-    // Main fundamental frequency
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.frequency.setValueAtTime(baseFreq, now);
-    osc1.type = 'sine';
-    gain1.gain.setValueAtTime(volume, now);
-    gain1.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    // Multiple short bursts like a childish giggle
+    for (let i = 0; i < 4; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
 
-    // Second harmonic (octave)
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.frequency.setValueAtTime(baseFreq * 2, now);
-    osc2.type = 'sine';
-    gain2.gain.setValueAtTime(volume * 0.5 * harmonicRichness, now);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.8);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
 
-    // Third harmonic (perfect fifth above octave)
-    const osc3 = ctx.createOscillator();
-    const gain3 = ctx.createGain();
-    osc3.connect(gain3);
-    gain3.connect(ctx.destination);
-    osc3.frequency.setValueAtTime(baseFreq * 3, now);
-    osc3.type = 'sine';
-    gain3.gain.setValueAtTime(volume * 0.25 * harmonicRichness, now);
-    gain3.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.6);
+      const startTime = now + i * 0.08;
+      const freq = 800 + Math.random() * 400 + (i * 100);
 
-    // Subtle beating effect with slightly detuned oscillator
-    const osc4 = ctx.createOscillator();
-    const gain4 = ctx.createGain();
-    osc4.connect(gain4);
-    gain4.connect(ctx.destination);
-    osc4.frequency.setValueAtTime(baseFreq * 1.003, now); // Slight detune for beating
-    osc4.type = 'sine';
-    gain4.gain.setValueAtTime(volume * 0.3, now);
-    gain4.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      osc.frequency.setValueAtTime(freq, startTime);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.7, startTime + 0.06);
+      osc.type = 'sine';
 
-    osc1.start(now);
-    osc1.stop(now + duration);
-    osc2.start(now);
-    osc2.stop(now + duration * 0.8);
-    osc3.start(now);
-    osc3.stop(now + duration * 0.6);
-    osc4.start(now);
-    osc4.stop(now + duration);
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1200, startTime);
+      filter.Q.setValueAtTime(5, startTime);
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.15, startTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.07);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.08);
+    }
   }
 
-  // Drop sound - gentle water drop
+  // Creepy whisper sound
+  private playWhisper(): void {
+    const ctx = this.getAudioContext();
+    const now = ctx.currentTime;
+
+    // White noise filtered to sound like whisper
+    const bufferSize = ctx.sampleRate * 0.5;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * 0.5;
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(2000, now);
+    filter.frequency.linearRampToValueAtTime(800, now + 0.4);
+    filter.Q.setValueAtTime(10, now);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.08, now + 0.05);
+    gain.gain.linearRampToValueAtTime(0.1, now + 0.2);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    noise.start(now);
+    noise.stop(now + 0.5);
+
+    // Add a subtle tone underneath
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    osc.connect(oscGain);
+    oscGain.connect(ctx.destination);
+
+    osc.frequency.setValueAtTime(150, now);
+    osc.frequency.linearRampToValueAtTime(100, now + 0.4);
+    osc.type = 'sine';
+
+    oscGain.gain.setValueAtTime(0.03, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+    osc.start(now);
+    osc.stop(now + 0.4);
+  }
+
+  // Distorted glitchy sound
+  private playDistorted(): void {
+    const ctx = this.getAudioContext();
+    const now = ctx.currentTime;
+
+    // Create distortion curve
+    const distortion = ctx.createWaveShaper();
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) {
+      const x = (i / 128) - 1;
+      curve[i] = Math.tanh(x * 5);
+    }
+    distortion.curve = curve;
+
+    // Glitchy oscillators
+    for (let i = 0; i < 3; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.connect(distortion);
+      distortion.connect(gain);
+      gain.connect(ctx.destination);
+
+      const startTime = now + i * 0.1;
+      const freq = 100 + Math.random() * 200;
+
+      osc.frequency.setValueAtTime(freq, startTime);
+      osc.frequency.setValueAtTime(freq * 2, startTime + 0.05);
+      osc.frequency.setValueAtTime(freq * 0.5, startTime + 0.1);
+      osc.type = 'sawtooth';
+
+      gain.gain.setValueAtTime(0.1, startTime);
+      gain.gain.setValueAtTime(0.05, startTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.15);
+    }
+  }
+
+  // Void/cosmic horror sound
+  private playVoid(): void {
+    const ctx = this.getAudioContext();
+    const now = ctx.currentTime;
+
+    // Deep drone
+    const drone = ctx.createOscillator();
+    const droneGain = ctx.createGain();
+    drone.connect(droneGain);
+    droneGain.connect(ctx.destination);
+
+    drone.frequency.setValueAtTime(40, now);
+    drone.frequency.linearRampToValueAtTime(30, now + 2);
+    drone.type = 'sine';
+
+    droneGain.gain.setValueAtTime(0, now);
+    droneGain.gain.linearRampToValueAtTime(0.2, now + 0.3);
+    droneGain.gain.linearRampToValueAtTime(0.15, now + 1);
+    droneGain.gain.exponentialRampToValueAtTime(0.001, now + 2);
+
+    drone.start(now);
+    drone.stop(now + 2);
+
+    // Eerie high pitched whine
+    const whine = ctx.createOscillator();
+    const whineGain = ctx.createGain();
+    const whineFilter = ctx.createBiquadFilter();
+
+    whine.connect(whineFilter);
+    whineFilter.connect(whineGain);
+    whineGain.connect(ctx.destination);
+
+    whine.frequency.setValueAtTime(2000, now);
+    whine.frequency.linearRampToValueAtTime(4000, now + 1.5);
+    whine.type = 'sine';
+
+    whineFilter.type = 'bandpass';
+    whineFilter.frequency.setValueAtTime(3000, now);
+    whineFilter.Q.setValueAtTime(20, now);
+
+    whineGain.gain.setValueAtTime(0, now + 0.5);
+    whineGain.gain.linearRampToValueAtTime(0.05, now + 0.8);
+    whineGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+
+    whine.start(now + 0.5);
+    whine.stop(now + 1.8);
+
+    // Static noise burst
+    const bufferSize = ctx.sampleRate * 0.3;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * 0.3;
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0, now + 0.2);
+    noiseGain.gain.linearRampToValueAtTime(0.1, now + 0.25);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+    noise.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+
+    noise.start(now + 0.2);
+    noise.stop(now + 0.5);
+  }
+
+  // Drop sound - squishy plop
   public playDropSound(): void {
     if (!this.isEnabled) return;
 
@@ -101,106 +238,27 @@ class SoundManager {
     osc.connect(gain);
     gain.connect(ctx.destination);
 
-    // Water drop: high to low frequency sweep
-    osc.frequency.setValueAtTime(600, now);
-    osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+    // Squishy drop sound
+    osc.frequency.setValueAtTime(300, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
     osc.type = 'sine';
 
-    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.setValueAtTime(0.2, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
 
     osc.start(now);
     osc.stop(now + 0.15);
   }
 
-  // Light merge sound - high, clear singing bowl
-  public playLightMergeSound(): void {
-    if (!this.isEnabled) return;
-    // High frequency, short duration - like a small crystal bowl
-    this.playSingingBowl(880, 1.5, 0.25, 0.8);
-  }
-
-  // Medium merge sound - mid-range singing bowl
-  public playMediumMergeSound(): void {
-    if (!this.isEnabled) return;
-    // Medium frequency, moderate duration
-    this.playSingingBowl(528, 2.0, 0.3, 1.0);
-  }
-
-  // Deep merge sound - low, resonant singing bowl
-  public playDeepMergeSound(): void {
-    if (!this.isEnabled) return;
-    // Low frequency, long duration - like a large Tibetan bowl
-    this.playSingingBowl(256, 2.5, 0.35, 1.2);
-  }
-
-  // Enlightenment sound - multiple bowls in harmony + ethereal tones
-  public playEnlightenmentSound(): void {
-    if (!this.isEnabled) return;
-
-    const ctx = this.getAudioContext();
-    const now = ctx.currentTime;
-
-    // Multiple singing bowls in harmony (Om chord)
-    this.playSingingBowl(256, 4.0, 0.25, 1.0); // Root
-    setTimeout(() => {
-      this.playSingingBowl(384, 3.5, 0.2, 0.8); // Fifth
-    }, 100);
-    setTimeout(() => {
-      this.playSingingBowl(512, 3.0, 0.15, 0.6); // Octave
-    }, 200);
-
-    // Ethereal shimmer effect
-    const shimmerOsc = ctx.createOscillator();
-    const shimmerGain = ctx.createGain();
-    const shimmerFilter = ctx.createBiquadFilter();
-
-    shimmerOsc.connect(shimmerFilter);
-    shimmerFilter.connect(shimmerGain);
-    shimmerGain.connect(ctx.destination);
-
-    shimmerOsc.type = 'sawtooth';
-    shimmerOsc.frequency.setValueAtTime(1024, now + 0.3);
-    shimmerOsc.frequency.linearRampToValueAtTime(2048, now + 2);
-
-    shimmerFilter.type = 'bandpass';
-    shimmerFilter.frequency.setValueAtTime(2000, now + 0.3);
-    shimmerFilter.Q.setValueAtTime(10, now + 0.3);
-
-    shimmerGain.gain.setValueAtTime(0, now);
-    shimmerGain.gain.linearRampToValueAtTime(0.08, now + 0.5);
-    shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 3);
-
-    shimmerOsc.start(now + 0.3);
-    shimmerOsc.stop(now + 3);
-
-    // Deep om drone
-    const droneOsc = ctx.createOscillator();
-    const droneGain = ctx.createGain();
-
-    droneOsc.connect(droneGain);
-    droneGain.connect(ctx.destination);
-
-    droneOsc.type = 'sine';
-    droneOsc.frequency.setValueAtTime(64, now);
-
-    droneGain.gain.setValueAtTime(0, now);
-    droneGain.gain.linearRampToValueAtTime(0.2, now + 0.5);
-    droneGain.gain.exponentialRampToValueAtTime(0.001, now + 4);
-
-    droneOsc.start(now);
-    droneOsc.stop(now + 4);
-  }
-
-  // Game over sound - melancholic descending tones
+  // Game over sound - creepy descending tones
   public playGameOverSound(): void {
     if (!this.isEnabled) return;
 
     const ctx = this.getAudioContext();
     const now = ctx.currentTime;
 
-    // Descending singing bowl tones
-    const frequencies = [528, 440, 352, 264];
+    // Descending dissonant tones
+    const frequencies = [400, 350, 280, 200, 150];
 
     frequencies.forEach((freq, index) => {
       const osc = ctx.createOscillator();
@@ -209,34 +267,58 @@ class SoundManager {
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      const startTime = now + index * 0.3;
+      const startTime = now + index * 0.25;
 
       osc.frequency.setValueAtTime(freq, startTime);
-      osc.type = 'sine';
+      osc.frequency.linearRampToValueAtTime(freq * 0.8, startTime + 0.2);
+      osc.type = 'triangle';
 
       gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.8);
+      gain.gain.linearRampToValueAtTime(0.15, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
 
       osc.start(startTime);
-      osc.stop(startTime + 0.8);
+      osc.stop(startTime + 0.4);
     });
+
+    // Add static noise at the end
+    const bufferSize = ctx.sampleRate * 0.5;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.1, now + 1);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+
+    noise.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+
+    noise.start(now + 1);
+    noise.stop(now + 1.5);
   }
 
-  // Play merge sound based on orb type
-  public playMergeSound(soundType: 'light' | 'medium' | 'deep' | 'enlightenment'): void {
+  // Play merge sound based on type
+  public playMergeSound(soundType: 'giggle' | 'whisper' | 'distorted' | 'void'): void {
+    if (!this.isEnabled) return;
+
     switch (soundType) {
-      case 'light':
-        this.playLightMergeSound();
+      case 'giggle':
+        this.playGiggle();
         break;
-      case 'medium':
-        this.playMediumMergeSound();
+      case 'whisper':
+        this.playWhisper();
         break;
-      case 'deep':
-        this.playDeepMergeSound();
+      case 'distorted':
+        this.playDistorted();
         break;
-      case 'enlightenment':
-        this.playEnlightenmentSound();
+      case 'void':
+        this.playVoid();
         break;
     }
   }
