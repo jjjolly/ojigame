@@ -410,7 +410,7 @@ export const useGame = () => {
       ctx.fillText(orb.emoji, 0, 0);
 
       // Special effect for TV head (final evolution)
-      if (orb.id === 5) {
+      if (orb.id === 10) {
         // Static noise effect
         ctx.globalAlpha = 0.3;
         for (let i = 0; i < 20; i++) {
@@ -551,7 +551,7 @@ export const useGame = () => {
 
           soundManager.playMergeSound(ORBS[orbId].soundType);
 
-          const isFinalForm = nextOrb.id === 5;
+          const isFinalForm = nextOrb.id === 10;
           particleSystem.createMergeParticles(midX, midY, nextOrb.glowColor, isFinalForm);
 
           const newScore = stateRef.current.score + nextOrb.score;
