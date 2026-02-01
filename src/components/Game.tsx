@@ -1,11 +1,20 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useGame } from '../hooks/useGame';
 import { soundManager } from '../utils/sounds';
 import './Game.css';
 
+// Constants for layout calculation
+const GAME_ASPECT_RATIO = 4 / 7; // width / height
+const AD_ASPECT_RATIO = 320 / 100; // width / height = 3.2
+const SCORE_DISPLAY_HEIGHT = 60; // approximate height of score display
+const AD_MARGIN = 15;
+const PADDING = 10;
+const MAX_GAME_WIDTH = 500;
+
 export const Game = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(400);
   const {
     gameState,
     startGame,
@@ -15,6 +24,42 @@ export const Game = () => {
     GAME_WIDTH,
     GAME_HEIGHT,
   } = useGame();
+
+  // Calculate responsive size based on viewport
+  useEffect(() => {
+    const calculateSize = () => {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Available space
+      const availableWidth = viewportWidth - (PADDING * 2);
+      const availableHeight = viewportHeight - (PADDING * 2);
+
+      // Calculate game height that would fit in available height
+      // Total height = score + game + margin + ad
+      // game_height = game_width / GAME_ASPECT_RATIO
+      // ad_height = game_width / AD_ASPECT_RATIO
+      // total = SCORE_DISPLAY_HEIGHT + (game_width / GAME_ASPECT_RATIO) + AD_MARGIN + (game_width / AD_ASPECT_RATIO)
+      // Solve for game_width:
+      // available_height = SCORE_DISPLAY_HEIGHT + game_width * (1/GAME_ASPECT_RATIO + 1/AD_ASPECT_RATIO) + AD_MARGIN
+      // game_width = (available_height - SCORE_DISPLAY_HEIGHT - AD_MARGIN) / (1/GAME_ASPECT_RATIO + 1/AD_ASPECT_RATIO)
+
+      const heightFactor = (1 / GAME_ASPECT_RATIO) + (1 / AD_ASPECT_RATIO);
+      const widthFromHeight = (availableHeight - SCORE_DISPLAY_HEIGHT - AD_MARGIN) / heightFactor;
+
+      // Use the smaller of available width or calculated width from height
+      let gameWidth = Math.min(availableWidth, widthFromHeight, MAX_GAME_WIDTH);
+
+      // Ensure minimum width
+      gameWidth = Math.max(gameWidth, 280);
+
+      setContainerWidth(gameWidth);
+    };
+
+    calculateSize();
+    window.addEventListener('resize', calculateSize);
+    return () => window.removeEventListener('resize', calculateSize);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -63,9 +108,17 @@ export const Game = () => {
     restartGame();
   }, [restartGame]);
 
+  // Calculate ad dimensions based on game width
+  const adWidth = containerWidth;
+  const adHeight = containerWidth / AD_ASPECT_RATIO;
+
   return (
     <div className="game-wrapper">
-      <div className="game-container" ref={containerRef}>
+      <div
+        className="game-container"
+        ref={containerRef}
+        style={{ width: `${containerWidth}px` }}
+      >
         {/* Score display */}
         <div className="score-display">
           <div className="score">
@@ -94,7 +147,10 @@ export const Game = () => {
         />
 
         {/* Ad placeholder */}
-        <div className="ad-placeholder">
+        <div
+          className="ad-placeholder"
+          style={{ width: `${adWidth}px`, height: `${adHeight}px` }}
+        >
           <span className="ad-label">[ ADVERTISEMENT ]</span>
         </div>
 

@@ -120,16 +120,16 @@ class SoundManager {
     const ctx = this.getAudioContext();
     const now = ctx.currentTime;
 
-    // Create distortion curve
+    // Create softer distortion curve
     const distortion = ctx.createWaveShaper();
     const curve = new Float32Array(256);
     for (let i = 0; i < 256; i++) {
       const x = (i / 128) - 1;
-      curve[i] = Math.tanh(x * 5);
+      curve[i] = Math.tanh(x * 2); // Reduced from 5 to 2 for softer distortion
     }
     distortion.curve = curve;
 
-    // Glitchy oscillators
+    // Glitchy oscillators - reduced gain to match other sounds
     for (let i = 0; i < 3; i++) {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -146,8 +146,9 @@ class SoundManager {
       osc.frequency.setValueAtTime(freq * 0.5, startTime + 0.1);
       osc.type = 'sawtooth';
 
-      gain.gain.setValueAtTime(0.1, startTime);
-      gain.gain.setValueAtTime(0.05, startTime + 0.05);
+      // Reduced gain: 0.1 -> 0.04 to compensate for distortion amplification
+      gain.gain.setValueAtTime(0.04, startTime);
+      gain.gain.setValueAtTime(0.02, startTime + 0.05);
       gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
 
       osc.start(startTime);
@@ -160,7 +161,7 @@ class SoundManager {
     const ctx = this.getAudioContext();
     const now = ctx.currentTime;
 
-    // Deep drone
+    // Deep drone - reduced gain since multiple sounds play together
     const drone = ctx.createOscillator();
     const droneGain = ctx.createGain();
     drone.connect(droneGain);
@@ -171,8 +172,8 @@ class SoundManager {
     drone.type = 'sine';
 
     droneGain.gain.setValueAtTime(0, now);
-    droneGain.gain.linearRampToValueAtTime(0.1, now + 0.3);
-    droneGain.gain.linearRampToValueAtTime(0.08, now + 1);
+    droneGain.gain.linearRampToValueAtTime(0.05, now + 0.3);
+    droneGain.gain.linearRampToValueAtTime(0.04, now + 1);
     droneGain.gain.exponentialRampToValueAtTime(0.001, now + 2);
 
     drone.start(now);
@@ -196,18 +197,18 @@ class SoundManager {
     whineFilter.Q.setValueAtTime(20, now);
 
     whineGain.gain.setValueAtTime(0, now + 0.5);
-    whineGain.gain.linearRampToValueAtTime(0.05, now + 0.8);
+    whineGain.gain.linearRampToValueAtTime(0.03, now + 0.8);
     whineGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
 
     whine.start(now + 0.5);
     whine.stop(now + 1.8);
 
-    // Static noise burst
+    // Static noise burst - reduced
     const bufferSize = ctx.sampleRate * 0.3;
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * 0.3;
+      data[i] = (Math.random() * 2 - 1) * 0.2;
     }
 
     const noise = ctx.createBufferSource();
@@ -215,7 +216,7 @@ class SoundManager {
 
     const noiseGain = ctx.createGain();
     noiseGain.gain.setValueAtTime(0, now + 0.2);
-    noiseGain.gain.linearRampToValueAtTime(0.1, now + 0.25);
+    noiseGain.gain.linearRampToValueAtTime(0.05, now + 0.25);
     noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
 
     noise.connect(noiseGain);

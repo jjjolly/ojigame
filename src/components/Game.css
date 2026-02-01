@@ -12,8 +12,6 @@
 
 .game-container {
   position: relative;
-  width: 100%;
-  max-width: 500px;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -92,10 +90,8 @@
   text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
-/* Ad placeholder - fixed 320x100 standard size */
+/* Ad placeholder - responsive, maintains 320:100 (3.2:1) aspect ratio */
 .ad-placeholder {
-  width: 320px;
-  height: 100px;
   background: linear-gradient(180deg, rgba(45, 27, 78, 0.9) 0%, rgba(26, 10, 46, 0.9) 100%);
   border: 1px solid rgba(0, 255, 255, 0.2);
   border-radius: 4px;
@@ -273,11 +269,7 @@
 
 
 /* Responsive adjustments */
-@media (max-width: 520px) {
-  .game-wrapper {
-    padding: 5px;
-  }
-
+@media (max-width: 400px) {
   .score-display {
     padding: 8px 10px;
   }
@@ -294,13 +286,13 @@
     font-size: 12px;
     letter-spacing: 2px;
   }
+
+  .ad-label {
+    font-size: 9px;
+  }
 }
 
-@media (max-height: 750px) {
-  .game-wrapper {
-    padding: 3px;
-  }
-
+@media (max-height: 600px) {
   .ad-placeholder {
     margin-top: 8px;
   }
