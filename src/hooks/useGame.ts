@@ -114,176 +114,296 @@ export const useGame = () => {
   };
 
   const drawLiminalBackground = (ctx: CanvasRenderingContext2D) => {
-    // Dark purple/pink gradient base
-    const gradient = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT);
-    gradient.addColorStop(0, '#2d1b4e');
-    gradient.addColorStop(0.5, '#1a0a2e');
-    gradient.addColorStop(1, '#0a0a1a');
-    ctx.fillStyle = gradient;
+    const vanishX = GAME_WIDTH / 2;
+    const vanishY = 180;
+    const time = frameCount * 0.015;
+
+    // Main background - purple/magenta gradient
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT);
+    bgGradient.addColorStop(0, '#4a3a6e');
+    bgGradient.addColorStop(0.3, '#3d2b5a');
+    bgGradient.addColorStop(0.6, '#2a1f42');
+    bgGradient.addColorStop(1, '#1a1428');
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-    // Perspective floor tiles
-    ctx.save();
-    const vanishY = 150;
-    const floorStart = 350;
+    // Ceiling area - lighter purple
+    ctx.fillStyle = '#5a4a7a';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(GAME_WIDTH, 0);
+    ctx.lineTo(vanishX + 80, vanishY - 40);
+    ctx.lineTo(vanishX - 80, vanishY - 40);
+    ctx.closePath();
+    ctx.fill();
 
-    // Floor gradient
-    const floorGradient = ctx.createLinearGradient(0, floorStart, 0, GAME_HEIGHT);
-    floorGradient.addColorStop(0, '#1a1a2e');
-    floorGradient.addColorStop(1, '#0d0d1a');
+    // Left wall (store fronts)
+    const leftWallGradient = ctx.createLinearGradient(0, 0, 80, 0);
+    leftWallGradient.addColorStop(0, '#2a2040');
+    leftWallGradient.addColorStop(1, '#3a2a50');
+    ctx.fillStyle = leftWallGradient;
+    ctx.beginPath();
+    ctx.moveTo(0, 60);
+    ctx.lineTo(80, vanishY);
+    ctx.lineTo(80, GAME_HEIGHT);
+    ctx.lineTo(0, GAME_HEIGHT);
+    ctx.closePath();
+    ctx.fill();
+
+    // Right wall (store fronts)
+    const rightWallGradient = ctx.createLinearGradient(GAME_WIDTH - 80, 0, GAME_WIDTH, 0);
+    rightWallGradient.addColorStop(0, '#3a2a50');
+    rightWallGradient.addColorStop(1, '#2a2040');
+    ctx.fillStyle = rightWallGradient;
+    ctx.beginPath();
+    ctx.moveTo(GAME_WIDTH, 60);
+    ctx.lineTo(GAME_WIDTH - 80, vanishY);
+    ctx.lineTo(GAME_WIDTH - 80, GAME_HEIGHT);
+    ctx.lineTo(GAME_WIDTH, GAME_HEIGHT);
+    ctx.closePath();
+    ctx.fill();
+
+    // Store windows on left (dark rectangles)
+    ctx.fillStyle = '#0a0810';
+    for (let i = 0; i < 3; i++) {
+      const y = 200 + i * 140;
+      ctx.fillRect(5, y, 60, 100);
+    }
+
+    // Store windows on right (dark rectangles)
+    for (let i = 0; i < 3; i++) {
+      const y = 200 + i * 140;
+      ctx.fillRect(GAME_WIDTH - 65, y, 60, 100);
+    }
+
+    // Floor with perspective tiles
+    const floorGradient = ctx.createLinearGradient(0, vanishY + 50, 0, GAME_HEIGHT);
+    floorGradient.addColorStop(0, '#2a2545');
+    floorGradient.addColorStop(1, '#1a1525');
     ctx.fillStyle = floorGradient;
     ctx.beginPath();
-    ctx.moveTo(0, floorStart);
-    ctx.lineTo(GAME_WIDTH, floorStart);
+    ctx.moveTo(80, vanishY);
+    ctx.lineTo(GAME_WIDTH - 80, vanishY);
     ctx.lineTo(GAME_WIDTH, GAME_HEIGHT);
     ctx.lineTo(0, GAME_HEIGHT);
+    ctx.closePath();
     ctx.fill();
 
-    // Grid lines on floor
-    ctx.strokeStyle = 'rgba(0, 255, 255, 0.15)';
+    // Floor grid lines
+    ctx.strokeStyle = 'rgba(100, 80, 140, 0.4)';
     ctx.lineWidth = 1;
-
-    // Horizontal lines with perspective
-    for (let i = 0; i < 10; i++) {
-      const y = floorStart + (GAME_HEIGHT - floorStart) * (i / 10);
-      const perspective = (y - vanishY) / (GAME_HEIGHT - vanishY);
-      ctx.globalAlpha = 0.1 + perspective * 0.2;
+    for (let i = 1; i < 12; i++) {
+      const ratio = i / 12;
+      const y = vanishY + (GAME_HEIGHT - vanishY) * ratio;
+      const leftX = 80 - (80 * ratio);
+      const rightX = GAME_WIDTH - 80 + (80 * ratio);
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(GAME_WIDTH, y);
+      ctx.moveTo(leftX, y);
+      ctx.lineTo(rightX, y);
       ctx.stroke();
     }
 
-    // Vertical lines converging to vanishing point
-    ctx.globalAlpha = 0.2;
-    for (let i = 0; i <= 8; i++) {
-      const x = (GAME_WIDTH / 8) * i;
+    // Vertical floor lines converging
+    for (let i = 0; i <= 10; i++) {
+      const bottomX = (GAME_WIDTH / 10) * i;
       ctx.beginPath();
-      ctx.moveTo(GAME_WIDTH / 2, vanishY);
-      ctx.lineTo(x, GAME_HEIGHT);
+      ctx.moveTo(vanishX, vanishY);
+      ctx.lineTo(bottomX, GAME_HEIGHT);
       ctx.stroke();
     }
+
+    // Cyan neon ceiling lines
+    ctx.save();
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#00FFFF';
+    ctx.strokeStyle = '#00FFFF';
+    ctx.lineWidth = 3;
+
+    // Main ceiling lines converging to center
+    ctx.beginPath();
+    ctx.moveTo(0, 50);
+    ctx.lineTo(vanishX - 60, vanishY - 30);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(GAME_WIDTH, 50);
+    ctx.lineTo(vanishX + 60, vanishY - 30);
+    ctx.stroke();
+
+    // Inner ceiling lines
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(40, 70);
+    ctx.lineTo(vanishX - 40, vanishY - 20);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(GAME_WIDTH - 40, 70);
+    ctx.lineTo(vanishX + 40, vanishY - 20);
+    ctx.stroke();
     ctx.restore();
 
-    // Neon ceiling lines
+    // Pink neon accents on walls
     ctx.save();
     ctx.shadowBlur = 15;
-    ctx.shadowColor = THEME.neonCyan;
-    ctx.strokeStyle = THEME.neonCyan;
+    ctx.shadowColor = '#FF69B4';
+    ctx.strokeStyle = '#FF69B4';
     ctx.lineWidth = 2;
+
+    // Left wall pink line
+    ctx.beginPath();
+    ctx.moveTo(70, 150);
+    ctx.lineTo(70, GAME_HEIGHT);
+    ctx.stroke();
+
+    // Right wall pink line
+    ctx.beginPath();
+    ctx.moveTo(GAME_WIDTH - 70, 150);
+    ctx.lineTo(GAME_WIDTH - 70, GAME_HEIGHT);
+    ctx.stroke();
+    ctx.restore();
+
+    // Vertical cyan neon on store fronts
+    ctx.save();
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#00FFFF';
+    ctx.strokeStyle = '#00FFFF';
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(15, 180);
+    ctx.lineTo(15, GAME_HEIGHT);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(GAME_WIDTH - 15, 180);
+    ctx.lineTo(GAME_WIDTH - 15, GAME_HEIGHT);
+    ctx.stroke();
+    ctx.restore();
+
+    // Party bunting/flags
+    ctx.save();
+    const flagColors = ['#FF69B4', '#00FFFF', '#FFD700', '#FF6B6B', '#9B59B6'];
+    for (let i = 0; i < 8; i++) {
+      const x = 60 + i * 40;
+      const sag = Math.sin((i / 7) * Math.PI) * 15;
+      ctx.fillStyle = flagColors[i % flagColors.length];
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(x, 110 + sag);
+      ctx.lineTo(x + 12, 110 + sag);
+      ctx.lineTo(x + 6, 130 + sag);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Disco ball
+    ctx.save();
     ctx.globalAlpha = 0.8;
-
-    // Left ceiling line
-    ctx.beginPath();
-    ctx.moveTo(0, 80);
-    ctx.lineTo(GAME_WIDTH / 2 - 50, vanishY - 20);
-    ctx.stroke();
-
-    // Right ceiling line
-    ctx.beginPath();
-    ctx.moveTo(GAME_WIDTH, 80);
-    ctx.lineTo(GAME_WIDTH / 2 + 50, vanishY - 20);
-    ctx.stroke();
-
-    // Pink neon accents
-    ctx.shadowColor = THEME.neonPink;
-    ctx.strokeStyle = THEME.neonPink;
-    ctx.lineWidth = 1.5;
-
-    ctx.beginPath();
-    ctx.moveTo(30, 100);
-    ctx.lineTo(GAME_WIDTH / 2 - 30, vanishY);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(GAME_WIDTH - 30, 100);
-    ctx.lineTo(GAME_WIDTH / 2 + 30, vanishY);
-    ctx.stroke();
-    ctx.restore();
-
-    // Floating kawaii elements
-    ctx.save();
-    ctx.globalAlpha = 0.4;
-    const time = frameCount * 0.02;
-
-    // Hearts
-    ctx.fillStyle = '#FF69B4';
-    ctx.font = '16px Arial';
-    ctx.fillText('♥', 50 + Math.sin(time) * 10, 200 + Math.cos(time * 0.7) * 15);
-    ctx.fillText('♥', 320 + Math.sin(time + 1) * 10, 180 + Math.cos(time * 0.8) * 15);
-
-    // Stars
-    ctx.fillStyle = '#FFD700';
-    ctx.fillText('★', 80 + Math.sin(time + 2) * 8, 150 + Math.cos(time * 0.6) * 12);
-    ctx.fillText('☆', 300 + Math.sin(time + 3) * 8, 220 + Math.cos(time * 0.9) * 12);
-
-    // Clouds
-    ctx.fillStyle = '#87CEEB';
-    ctx.fillText('☁', 150 + Math.sin(time * 0.5) * 15, 170 + Math.cos(time * 0.4) * 8);
-
-    // Japanese characters floating
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.font = '12px Arial';
-    const chars = ['カ', 'ワ', 'イ', 'イ', '夢'];
-    chars.forEach((char, i) => {
-      const x = 60 + i * 70 + Math.sin(time + i) * 5;
-      const y = 250 + Math.cos(time * 0.5 + i) * 20;
-      ctx.fillText(char, x, y);
-    });
-    ctx.restore();
-
-    // Scanlines effect
-    ctx.save();
-    ctx.globalAlpha = 0.03;
-    ctx.fillStyle = '#000';
-    for (let y = 0; y < GAME_HEIGHT; y += 3) {
-      ctx.fillRect(0, y, GAME_WIDTH, 1);
-    }
-    ctx.restore();
-
-    // Random glitch offset
-    if (Math.random() < 0.02) {
-      glitchOffset = (Math.random() - 0.5) * 10;
-    } else {
-      glitchOffset *= 0.9;
-    }
-
-    // VHS noise at edges
-    ctx.save();
-    ctx.globalAlpha = 0.1;
-    for (let i = 0; i < 50; i++) {
-      const x = Math.random() * GAME_WIDTH;
-      const y = Math.random() * GAME_HEIGHT;
-      const size = Math.random() * 2;
-      ctx.fillStyle = Math.random() > 0.5 ? '#FF69B4' : '#00FFFF';
-      ctx.fillRect(x, y, size, size);
-    }
-    ctx.restore();
-
-    // Disco ball hint at top
-    ctx.save();
-    ctx.globalAlpha = 0.3;
-    ctx.fillStyle = '#C0C0C0';
-    ctx.shadowBlur = 20;
+    const gradient = ctx.createRadialGradient(vanishX, 60, 0, vanishX, 60, 18);
+    gradient.addColorStop(0, '#FFFFFF');
+    gradient.addColorStop(0.5, '#C0C0C0');
+    gradient.addColorStop(1, '#808080');
+    ctx.fillStyle = gradient;
+    ctx.shadowBlur = 25;
     ctx.shadowColor = '#FFFFFF';
     ctx.beginPath();
-    ctx.arc(GAME_WIDTH / 2, 30, 12, 0, Math.PI * 2);
+    ctx.arc(vanishX, 60, 15, 0, Math.PI * 2);
     ctx.fill();
 
-    // Reflection lines
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 5; i++) {
-      const angle = (frameCount * 0.02 + i * Math.PI * 0.4) % (Math.PI * 2);
+    // Disco ball reflections
+    ctx.globalAlpha = 0.3;
+    for (let i = 0; i < 6; i++) {
+      const angle = time * 2 + (i * Math.PI / 3);
+      const length = 50 + Math.sin(time + i) * 20;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(GAME_WIDTH / 2, 30);
+      ctx.moveTo(vanishX, 60);
       ctx.lineTo(
-        GAME_WIDTH / 2 + Math.cos(angle) * 100,
-        30 + Math.sin(angle) * 100
+        vanishX + Math.cos(angle) * length,
+        60 + Math.sin(angle) * length * 0.5
       );
       ctx.stroke();
     }
     ctx.restore();
+
+    // Floating kawaii elements
+    ctx.save();
+
+    // Hearts (pink)
+    ctx.fillStyle = '#FF69B4';
+    ctx.globalAlpha = 0.7;
+    ctx.font = '18px Arial';
+    ctx.fillText('♥', 30 + Math.sin(time) * 8, 250 + Math.cos(time * 0.8) * 10);
+    ctx.fillText('♥', 350 + Math.sin(time + 2) * 8, 200 + Math.cos(time * 0.7) * 12);
+    ctx.font = '14px Arial';
+    ctx.fillText('♥', 120 + Math.sin(time + 1) * 6, 300 + Math.cos(time * 0.9) * 8);
+
+    // Stars (yellow)
+    ctx.fillStyle = '#FFD700';
+    ctx.globalAlpha = 0.8;
+    ctx.font = '16px Arial';
+    ctx.fillText('★', 50 + Math.sin(time + 0.5) * 6, 150 + Math.cos(time * 0.6) * 8);
+    ctx.fillText('☆', 320 + Math.sin(time + 1.5) * 6, 280 + Math.cos(time * 0.5) * 10);
+    ctx.font = '12px Arial';
+    ctx.fillText('★', 280 + Math.sin(time + 3) * 5, 160 + Math.cos(time * 0.7) * 6);
+
+    // Clouds (cyan)
+    ctx.fillStyle = '#87CEEB';
+    ctx.globalAlpha = 0.6;
+    ctx.font = '20px Arial';
+    ctx.fillText('☁', 300 + Math.sin(time * 0.4) * 10, 140 + Math.cos(time * 0.3) * 5);
+    ctx.font = '16px Arial';
+    ctx.fillText('☁', 100 + Math.sin(time * 0.5 + 1) * 8, 180 + Math.cos(time * 0.4) * 6);
+
+    // Moon/circle
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = '#E8E0F0';
+    ctx.beginPath();
+    ctx.arc(330 + Math.sin(time * 0.3) * 5, 120 + Math.cos(time * 0.2) * 3, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Japanese katakana scattered
+    ctx.fillStyle = 'rgba(200, 180, 220, 0.4)';
+    ctx.font = '14px Arial';
+    const kataChars = ['カ', 'ワ', 'イ', 'ク', 'ラ', 'ユ', 'メ', 'コ'];
+    kataChars.forEach((char, i) => {
+      const x = 40 + (i % 4) * 90 + Math.sin(time + i * 0.5) * 5;
+      const y = 220 + Math.floor(i / 4) * 150 + Math.cos(time * 0.4 + i) * 8;
+      ctx.fillText(char, x, y);
+    });
+    ctx.restore();
+
+    // Sparkles/particles
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+    for (let i = 0; i < 30; i++) {
+      const sparkleX = (Math.sin(time * 0.5 + i * 1.3) * 0.5 + 0.5) * GAME_WIDTH;
+      const sparkleY = (Math.cos(time * 0.3 + i * 0.9) * 0.5 + 0.5) * GAME_HEIGHT;
+      const size = 1 + Math.sin(time * 2 + i) * 0.5;
+      const colors = ['#FFFFFF', '#FF69B4', '#00FFFF', '#FFD700'];
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fillRect(sparkleX, sparkleY, size, size);
+    }
+    ctx.restore();
+
+    // Subtle scanlines
+    ctx.save();
+    ctx.globalAlpha = 0.04;
+    ctx.fillStyle = '#000';
+    for (let y = 0; y < GAME_HEIGHT; y += 2) {
+      ctx.fillRect(0, y, GAME_WIDTH, 1);
+    }
+    ctx.restore();
+
+    // Random glitch
+    if (Math.random() < 0.01) {
+      glitchOffset = (Math.random() - 0.5) * 6;
+    } else {
+      glitchOffset *= 0.95;
+    }
   };
 
   const draw = () => {
