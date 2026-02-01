@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useGame } from '../hooks/useGame';
 import { soundManager } from '../utils/sounds';
-import { ORBS } from '../constants/uncles';
 import './Game.css';
 
 export const Game = () => {
@@ -122,24 +121,6 @@ export const Game = () => {
           </div>
         )}
 
-        {/* Evolution guide */}
-        <div className="evolution-guide">
-          <div className="guide-title">MERGE CHART</div>
-          <div className="guide-list">
-            {ORBS.map((orb, idx) => (
-              <div
-                key={idx}
-                className="guide-item"
-                style={{
-                  background: `radial-gradient(circle, ${orb.color}60 0%, ${orb.glowColor}30 100%)`,
-                  boxShadow: `0 0 10px ${orb.glowColor}80`
-                }}
-              >
-                <span className="guide-emoji">{orb.emoji}</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

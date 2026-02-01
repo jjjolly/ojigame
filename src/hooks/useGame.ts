@@ -151,8 +151,8 @@ export const useGame = () => {
     }
     ctx.restore();
 
-    // Random glitch
-    if (Math.random() < 0.01) {
+    // Random glitch (0.7% chance)
+    if (Math.random() < 0.007) {
       glitchOffset = (Math.random() - 0.5) * 6;
     } else {
       glitchOffset *= 0.95;

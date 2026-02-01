@@ -145,7 +145,7 @@ export const UNCLES = ORBS;
 
 // Game constants
 export const GAME_WIDTH = 400;
-export const GAME_HEIGHT = 600;
+export const GAME_HEIGHT = 700;
 export const WALL_THICKNESS = 20;
 export const GAME_OVER_LINE_Y = 100;
 export const DROP_AREA_HEIGHT = 80;
