@@ -54,7 +54,7 @@ class SoundManager {
       filter.Q.setValueAtTime(5, startTime);
 
       gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(0.15, startTime + 0.01);
+      gain.gain.linearRampToValueAtTime(0.1, startTime + 0.01);
       gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.07);
 
       osc.start(startTime);
@@ -171,8 +171,8 @@ class SoundManager {
     drone.type = 'sine';
 
     droneGain.gain.setValueAtTime(0, now);
-    droneGain.gain.linearRampToValueAtTime(0.2, now + 0.3);
-    droneGain.gain.linearRampToValueAtTime(0.15, now + 1);
+    droneGain.gain.linearRampToValueAtTime(0.1, now + 0.3);
+    droneGain.gain.linearRampToValueAtTime(0.08, now + 1);
     droneGain.gain.exponentialRampToValueAtTime(0.001, now + 2);
 
     drone.start(now);
@@ -243,7 +243,7 @@ class SoundManager {
     osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
     osc.type = 'sine';
 
-    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.setValueAtTime(0.1, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
 
     osc.start(now);
@@ -274,7 +274,7 @@ class SoundManager {
       osc.type = 'triangle';
 
       gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(0.15, startTime + 0.02);
+      gain.gain.linearRampToValueAtTime(0.1, startTime + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
 
       osc.start(startTime);

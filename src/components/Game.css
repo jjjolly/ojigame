@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100vh;
   min-height: 100dvh;
   background: linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 50%, #0a0a1a 100%);
@@ -12,8 +12,8 @@
 
 .game-container {
   position: relative;
-  width: 400px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 500px;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -21,7 +21,7 @@
 
 .game-canvas {
   display: block;
-  max-width: 100%;
+  width: 100%;
   height: auto;
   border-radius: 4px;
   box-shadow:
@@ -92,18 +92,17 @@
   text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
-/* Ad placeholder */
+/* Ad placeholder - fixed 320x100 standard size */
 .ad-placeholder {
-  width: 100%;
+  width: 320px;
+  height: 100px;
   background: linear-gradient(180deg, rgba(45, 27, 78, 0.9) 0%, rgba(26, 10, 46, 0.9) 100%);
   border: 1px solid rgba(0, 255, 255, 0.2);
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  height: 150px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -4px;
+  margin-top: 15px;
   box-sizing: border-box;
 }
 
@@ -274,7 +273,7 @@
 
 
 /* Responsive adjustments */
-@media (max-width: 420px) {
+@media (max-width: 520px) {
   .game-wrapper {
     padding: 5px;
   }
@@ -295,19 +294,15 @@
     font-size: 12px;
     letter-spacing: 2px;
   }
-
-  .ad-placeholder {
-    height: 120px;
-  }
-
-  .ad-label {
-    font-size: 9px;
-  }
 }
 
-@media (max-height: 800px) {
+@media (max-height: 750px) {
   .game-wrapper {
-    padding: 5px;
+    padding: 3px;
+  }
+
+  .ad-placeholder {
+    margin-top: 8px;
   }
 }
 
